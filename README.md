@@ -47,7 +47,8 @@ make build     # → ./bin/kimai-tracker
 ./bin/kimai-tracker
 ```
 
-Make sure `$(go env GOPATH)/bin` is on your `PATH` so the `wails3` CLI is found.
+The Makefile finds the `wails3` CLI in `$(go env GOPATH)/bin` automatically. To call
+`wails3` directly, add that directory to your `PATH`.
 
 **Ubuntu 22.04:** GTK 4/WebKitGTK 6.0 are not available there. Use the GTK 3 stack instead:
 
