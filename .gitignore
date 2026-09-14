@@ -1,0 +1,14 @@
+.task
+bin
+frontend/dist
+frontend/node_modules
+build/linux/appimage/build
+build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+
+# Generated from build/linux/desktop
+build/linux/kimai-tracker.desktop
+build/linux/appimage/kimai-tracker
+build/linux/appimage/kimai-tracker.png
+*.AppImage
+*.deb
+*.rpm

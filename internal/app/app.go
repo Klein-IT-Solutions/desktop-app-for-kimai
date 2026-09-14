@@ -1,0 +1,62 @@
+// Package app contains the services exposed to the frontend.
+package app
+
+import (
+	"os"
+	"runtime"
+	"strings"
+
+	"github.com/wailsapp/wails/v3/pkg/application"
+)
+
+// Version is overridden at build time via -ldflags "-X .../internal/app.Version=...".
+var Version = "0.1.0-dev"
+
+// Info describes the running application and its environment.
+type Info struct {
+	Version     string `json:"version"`
+	Platform    string `json:"platform"`
+	SessionType string `json:"sessionType"` // "wayland", "x11" or "" on non-Linux
+	DarkMode    bool   `json:"darkMode"`
+}
+
+// AppService exposes general application information and window helpers.
+type AppService struct{}
+
+// NewAppService creates the service.
+func NewAppService() *AppService { return &AppService{} }
+
+// Info returns version and environment details.
+func (s *AppService) Info() Info {
+	return Info{
+		Version:     Version,
+		Platform:    runtime.GOOS,
+		SessionType: SessionType(),
+		DarkMode:    s.IsDarkMode(),
+	}
+}
+
+// IsDarkMode reports whether the desktop prefers a dark colour scheme.
+func (s *AppService) IsDarkMode() bool {
+	if a := application.Get(); a != nil {
+		return a.Env.IsDarkMode()
+	}
+	return false
+}
+
+// SessionType returns the Linux display server type ("wayland" or "x11").
+func SessionType() string {
+	if runtime.GOOS != "linux" {
+		return ""
+	}
+	if t := strings.ToLower(os.Getenv("XDG_SESSION_TYPE")); t == "wayland" || t == "x11" {
+		return t
+	}
+	if os.Getenv("WAYLAND_DISPLAY") != "" {
+		return "wayland"
+	}
+	if os.Getenv("DISPLAY") != "" {
+		return "x11"
+	}
+	return ""
+}
