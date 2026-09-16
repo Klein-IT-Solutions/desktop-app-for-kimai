@@ -3,9 +3,8 @@
 A minimalist, open-source desktop time tracker for [Kimai](https://www.kimai.org) –
 built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind CSS.
 
-> **Status:** early development (step 1 of 6 – window shell & design). The Kimai
-> connection, tray, hotkey and voice input are being added step by step, see
-> [Roadmap](#roadmap).
+> **Status:** early development (step 2 of 6 – settings & Kimai connection). Tracking,
+> tray, hotkey and voice input are being added step by step, see [Roadmap](#roadmap).
 
 | Light | Dark |
 | ----- | ---- |
@@ -21,7 +20,9 @@ built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind 
 - Big start/stop button with live elapsed time; picks up a timer already running in Kimai *(step 3)*
 - Runs in the background: tray icon with status, global hotkey, notifications *(step 4)*
 - Voice input for the description via local whisper.cpp or an OpenAI-compatible API *(step 5)*
-- API token stored in the system keyring, never in plain text *(step 2)*
+- API token stored in the system keyring, never in plain text
+- Connection test with clear messages for wrong URL, invalid token (401), missing
+  permissions (403), offline server and untrusted TLS certificates
 
 ## Installation
 
@@ -65,7 +66,30 @@ make build GTK3=1
 | `make build` | Production binary in `./bin`                      |
 | `make test`  | Go unit tests and frontend type check             |
 | `make lint`  | `go vet` and `gofmt` check                        |
+| `make kimai-up` / `make kimai-down` | Local Kimai test instance in Docker |
+| `make test-integration` | API tests against a real Kimai          |
 | `make help`  | All targets                                       |
+
+### Testing against a local Kimai
+
+`make kimai-up` starts Kimai 2 + MariaDB via Docker Compose, creates an API token and
+seeds customers, projects and activities. It prints URL and token, e.g.:
+
+```
+Web UI:     http://localhost:8001  (admin / changeme123)
+API token:  kt_dev_token_0123456789abcdef0123456789
+```
+
+Enter both in the app's settings, or run the integration tests, which start, update
+and stop a real timesheet:
+
+```bash
+KIMAI_TEST_URL=http://localhost:8001 \
+KIMAI_TEST_TOKEN=kt_dev_token_0123456789abcdef0123456789 make test-integration
+```
+
+`make kimai-down` removes the instance including its data. You can also point the
+integration tests at your own Kimai – use a test account, they create and delete a timesheet.
 
 ## Kimai API token
 
@@ -85,6 +109,12 @@ Non-secret settings live in `~/.config/kimai-tracker/config.json`.
 
 Your Kimai user needs permission to use the API and to create/edit their own timesheets.
 
+If no keyring is available (e.g. a minimal window manager without GNOME Keyring or
+KWallet), the settings show a hint; install and start `gnome-keyring` in that case.
+
+The URL may be entered with or without `https://` and with or without a trailing `/api`.
+Without a scheme, `https://` is assumed (`http://` for `localhost`).
+
 ## Linux notes
 
 - **Transparency & blur:** The window background is semi-transparent when a compositor
@@ -102,13 +132,15 @@ Your Kimai user needs permission to use the API and to create/edit their own tim
 ├── main.go                 # Wails application & window setup
 ├── internal/
 │   ├── app/                # Services exposed to the frontend
-│   ├── config/             # Configuration & keyring        (step 2)
-│   ├── kimai/              # Kimai REST client with tests   (step 2)
+│   ├── config/             # Configuration & keyring
+│   ├── kimai/              # Kimai REST client with tests
 │   └── voice/              # Recording & transcription      (step 5)
 ├── frontend/               # Svelte + TypeScript + Tailwind UI
 │   ├── bindings/           # Generated TypeScript bindings for Go services
 │   └── src/
 ├── build/                  # Wails build assets (icons, .desktop, nfpm, AppImage)
+├── dev/kimai/              # Docker Compose for the local Kimai test instance
+├── scripts/                # Test-instance provisioning and seeding
 ├── docs/                   # Architecture notes, screenshots
 ├── Makefile
 └── Taskfile.yml            # Used internally by the wails3 CLI
@@ -119,7 +151,7 @@ See [docs/architecture.md](docs/architecture.md) for technical decisions.
 ## Roadmap
 
 1. ✅ Wails shell with frameless, styled window
-2. ⏳ Settings + Kimai client including connection test
+2. ✅ Settings + Kimai client including connection test
 3. ⏳ Customer/project/activity flow and start/stop
 4. ⏳ Tray, global hotkey, background operation
 5. ⏳ Voice input

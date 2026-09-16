@@ -27,3 +27,10 @@ export function Info(): $CancellablePromise<$models.Info> {
 export function IsDarkMode(): $CancellablePromise<boolean> {
     return $Call.ByID(2974996380);
 }
+
+/**
+ * OpenURL opens an http(s) link in the default browser.
+ */
+export function OpenURL(url: string): $CancellablePromise<void> {
+    return $Call.ByID(212396996, url);
+}

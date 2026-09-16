@@ -130,11 +130,12 @@ textarea {
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--hairline);
-  border-radius: 4px;
+  background: var(--fg-subtle);
+  border-radius: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {

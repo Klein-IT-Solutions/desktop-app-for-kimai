@@ -3,11 +3,13 @@ package main
 import (
 	"embed"
 	"log"
+	"os"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
 	"github.com/klein-it-solutions/kimai-desktop-app/internal/app"
+	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
 )
 
 //go:embed all:frontend/dist
@@ -22,16 +24,41 @@ const (
 
 func init() {
 	application.RegisterEvent[bool]("theme:changed")
+	application.RegisterEvent[app.ConnectionResult](app.EventConnectionChanged)
+}
+
+// openConfig loads the configuration. A corrupt file is moved aside so the
+// app still starts (with defaults) instead of failing.
+func openConfig() *config.Store {
+	path, err := config.DefaultPath()
+	if err != nil {
+		log.Fatal(err)
+	}
+	store, err := config.Open(path)
+	if err == nil {
+		return store
+	}
+	log.Printf("config: %v – moving it to %s.broken and starting with defaults", err, path)
+	_ = os.Rename(path, path+".broken")
+	store, err = config.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return store
 }
 
 func main() {
 	var mainWindow *application.WebviewWindow
+
+	conn := app.NewConnection(openConfig(), config.Keyring{})
+	settings := app.NewSettingsService(conn)
 
 	a := application.New(application.Options{
 		Name:        "Kimai Tracker",
 		Description: "Minimalist desktop time tracker for Kimai",
 		Services: []application.Service{
 			application.NewService(app.NewAppService()),
+			application.NewService(settings),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),

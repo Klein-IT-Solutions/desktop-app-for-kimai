@@ -46,3 +46,38 @@ up the desktop preference, so the Go side additionally reads the XDG desktop por
 Go services in `internal/app` are bound via Wails; TypeScript bindings are generated
 into `frontend/bindings` by `wails3 generate bindings` (run automatically during
 `make build` / `make dev`).
+
+## Configuration and secrets
+
+- `internal/config` stores non-secret settings in `~/.config/kimai-tracker/config.json`
+  (honours `XDG_CONFIG_HOME`), written atomically with mode `0600`. A corrupt file is
+  moved to `config.json.broken` and the app starts with defaults.
+- The API token lives in the system keyring via `zalando/go-keyring`
+  (service `kimai-tracker`, key `kimai-api-token`). The token is never sent back to
+  the frontend; the UI only learns whether one is stored.
+
+## Kimai client
+
+`internal/kimai` is a small, dependency-free client for the Kimai 2.x REST API
+(Bearer token auth). Notes from testing against Kimai 2.69:
+
+- Relations come as plain IDs from collection endpoints but as nested objects from
+  `/api/timesheets/active`; `kimai.Ref` accepts both.
+- Timestamps are returned as `2026-10-13T09:15:00+0200` and must be sent as
+  `2026-10-13T09:15:00` in the **user's Kimai time zone**. The time zone is a top-level
+  field of `/api/users/me` (older versions: a `timezone` preference). The client formats
+  `begin` in that zone, so desktop and Kimai time zones may differ.
+- `/api/activities?project=ID` returns project-specific and global activities.
+- Errors are mapped to sentinels (`ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`,
+  `ErrOffline`, `ErrCertificate`, `ErrNotHTTPS`, `ErrUnexpectedResponse`); the app layer
+  turns them into German UI messages (`app.DescribeError`).
+
+Unit tests use `httptest`; `integration_test.go` (build tag `integration`) runs the
+full start → update → stop flow against a real instance (`make kimai-up`).
+
+## Services
+
+- `AppService` – app info, dark mode, opening links.
+- `SettingsService` – settings, token, connection test; emits `connection:changed`.
+- `Connection` (not bound) – shared config/secret access and the Kimai client factory
+  for the services added in later steps.

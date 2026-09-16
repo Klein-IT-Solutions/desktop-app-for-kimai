@@ -39,10 +39,9 @@
   <div class="no-drag ml-auto flex items-center">
     {#if canGoBack}
       <button
-        class="flex items-center gap-0.5 rounded-md px-1.5 py-1 text-[13px] text-accent transition-colors hover:bg-field-hover"
+        class="rounded-md px-2 py-1 text-[13px] font-medium text-accent transition-opacity hover:opacity-75"
         onclick={onBack}
       >
-        <Icon name="chevronLeft" size={14} stroke={2.2} />
         Fertig
       </button>
     {:else}

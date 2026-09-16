@@ -2,6 +2,7 @@
 package app
 
 import (
+	"errors"
 	"os"
 	"runtime"
 	"strings"
@@ -59,4 +60,15 @@ func SessionType() string {
 		return "x11"
 	}
 	return ""
+}
+
+// OpenURL opens an http(s) link in the default browser.
+func (s *AppService) OpenURL(url string) error {
+	if !strings.HasPrefix(url, "https://") && !strings.HasPrefix(url, "http://") {
+		return errors.New("only http(s) links can be opened")
+	}
+	if a := application.Get(); a != nil {
+		return a.Browser.OpenURL(url)
+	}
+	return nil
 }
