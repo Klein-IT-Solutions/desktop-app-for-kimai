@@ -29,6 +29,11 @@ it in v3.1.
   on X11 and Wayland.
 - The drag region is the title bar (`--wails-draggable: drag`); interactive children
   opt out with `no-drag`.
+- **GTK4 transparency workaround:** Wails v3 beta.28 makes the webview transparent
+  but leaves the GTK theme's window background in place (`setTransparent()` is a
+  no-op on GTK4), which shows as an opaque rectangle around the rounded card.
+  `internal/desktop` installs a small GTK CSS provider that clears the background of
+  frameless windows. Remove it once Wails handles this itself.
 - Linux has no portable "blur behind window" API (KDE offers one, GNOME doesn't).
   The frosted look is therefore a tinted, semi-transparent surface plus a subtle
   noise texture. On macOS/Windows the native translucent backdrop is enabled.

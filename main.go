@@ -10,6 +10,7 @@ import (
 
 	"github.com/klein-it-solutions/kimai-desktop-app/internal/app"
 	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
+	"github.com/klein-it-solutions/kimai-desktop-app/internal/desktop"
 )
 
 //go:embed all:frontend/dist
@@ -105,6 +106,10 @@ func main() {
 			WindowIsTranslucent: true,
 		},
 		URL: "/",
+	})
+
+	a.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
+		application.InvokeSync(desktop.MakeFramelessWindowsTransparent)
 	})
 
 	a.Event.OnApplicationEvent(events.Common.ThemeChanged, func(*application.ApplicationEvent) {
