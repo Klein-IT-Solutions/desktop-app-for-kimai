@@ -15,6 +15,8 @@ built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind 
 ## Features
 
 - Compact, frameless window (360 × 480) with rounded corners, translucent surface and soft shadow
+- Native-looking window buttons per platform (macOS, Windows, GNOME, KDE), honouring
+  the GNOME button layout (left/right, minimize shown or hidden)
 - Automatic light/dark mode following the system
 - Customer → project → activity selection with search and recently used entries *(step 3)*
 - Big start/stop button with live elapsed time; picks up a timer already running in Kimai *(step 3)*

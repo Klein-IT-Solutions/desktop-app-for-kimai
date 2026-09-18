@@ -27,6 +27,17 @@
   --window-shadow: 0 10px 30px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+/* Corner radius follows the platform look (set via data-wc on <html>). */
+:root[data-wc="windows"] {
+  --radius-window: 8px;
+}
+:root[data-wc="gnome"] {
+  --radius-window: 12px;
+}
+:root[data-wc="kde"] {
+  --radius-window: 8px;
+}
+
 .dark {
   --surface: rgba(30, 30, 32, 0.84);
   --surface-tint: rgba(255, 255, 255, 0.04);

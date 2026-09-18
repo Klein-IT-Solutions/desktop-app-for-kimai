@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Application, Window } from "@wailsio/runtime";
   import Icon from "./Icon.svelte";
+  import WindowButtons from "./WindowButtons.svelte";
+  import { platform } from "../platform";
 
   let {
     title,
@@ -9,34 +10,19 @@
     onSettings,
   }: { title: string; canGoBack?: boolean; onBack?: () => void; onSettings?: () => void } = $props();
 
-  // Step 1: closing quits. Once the tray exists (step 4) this hides the window instead.
-  const close = () => Application.Quit();
-  const minimise = () => Window.Minimise();
+  const controls = platform.controls;
+  const controlsLeft = controls.side === "left";
 </script>
 
-<header class="drag relative flex h-10 shrink-0 items-center px-3.5">
-  <div class="no-drag group flex items-center gap-2">
-    <button
-      class="grid size-3 place-items-center rounded-full bg-[#ff5f57] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.12)]"
-      aria-label="Schließen"
-      onclick={close}
-    >
-      <svg viewBox="0 0 12 12" class="size-2 opacity-0 transition-opacity group-hover:opacity-100" stroke="#4d0000" stroke-width="1.4" stroke-linecap="round"><path d="M3.5 3.5l5 5m0-5l-5 5" /></svg>
-    </button>
-    <button
-      class="grid size-3 place-items-center rounded-full bg-[#febc2e] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.12)]"
-      aria-label="Minimieren"
-      onclick={minimise}
-    >
-      <svg viewBox="0 0 12 12" class="size-2 opacity-0 transition-opacity group-hover:opacity-100" stroke="#5a3a00" stroke-width="1.4" stroke-linecap="round"><path d="M3 6h6" /></svg>
-    </button>
-  </div>
+<header class="drag relative flex h-10 shrink-0 items-center px-3.5 {controlsLeft ? '' : 'flex-row-reverse'}">
+  <WindowButtons {controls} />
 
   <div class="pointer-events-none absolute inset-x-0 text-center text-[13px] font-semibold tracking-[-0.01em] text-fg/85">
     {title}
   </div>
 
-  <div class="no-drag ml-auto flex items-center">
+  <!-- Settings / Done sit on the side opposite the window buttons. -->
+  <div class="no-drag flex items-center {controlsLeft ? 'ml-auto' : 'mr-auto'}">
     {#if canGoBack}
       <button
         class="rounded-md px-2 py-1 text-[13px] font-medium text-accent transition-opacity hover:opacity-75"

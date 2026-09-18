@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+
+	"github.com/klein-it-solutions/kimai-desktop-app/internal/desktop"
 )
 
 // Version is overridden at build time via -ldflags "-X .../internal/app.Version=...".
@@ -19,6 +21,8 @@ type Info struct {
 	Platform    string `json:"platform"`
 	SessionType string `json:"sessionType"` // "wayland", "x11" or "" on non-Linux
 	DarkMode    bool   `json:"darkMode"`
+	// WindowControls tells the frontend how to render the title bar buttons.
+	WindowControls desktop.WindowControls `json:"windowControls"`
 }
 
 // AppService exposes general application information and window helpers.
@@ -34,6 +38,8 @@ func (s *AppService) Info() Info {
 		Platform:    runtime.GOOS,
 		SessionType: SessionType(),
 		DarkMode:    s.IsDarkMode(),
+		// Detected per call so a changed GNOME button layout applies after a reload.
+		WindowControls: desktop.DetectWindowControls(),
 	}
 }
 

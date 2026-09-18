@@ -37,6 +37,14 @@ it in v3.1.
 - Linux has no portable "blur behind window" API (KDE offers one, GNOME doesn't).
   The frosted look is therefore a tinted, semi-transparent surface plus a subtle
   noise texture. On macOS/Windows the native translucent backdrop is enabled.
+- Window buttons follow the platform (`internal/desktop.DetectWindowControls`):
+  macOS traffic lights on the left; Windows 11 caption buttons on the right; on Linux
+  Adwaita-style buttons (GNOME and others) or Breeze-style (KDE, via
+  `XDG_CURRENT_DESKTOP`). The side, order and visible buttons come from the desktop's
+  `org.gnome.desktop.wm.preferences button-layout` (XDG portal, fallback `gsettings`),
+  so the GNOME default `appmenu:close` shows only a close button. Settings/Done sit on
+  the opposite side. `KIMAI_TRACKER_WINDOW_STYLE=mac|windows|gnome|kde` forces a style
+  for development. The corner radius follows the platform too.
 - Single instance: a second launch focuses the running window. This is also the
   basis for the Wayland hotkey fallback (bind a desktop shortcut to the binary).
 
