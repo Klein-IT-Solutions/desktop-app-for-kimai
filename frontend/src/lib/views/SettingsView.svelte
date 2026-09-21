@@ -124,14 +124,19 @@
     <TextField
       label="API-Token"
       type={showToken ? "text" : "password"}
-      placeholder={settings?.hasToken
-        ? settings.tokenStorage === "file"
-          ? "In Datei gespeichert"
-          : "Im Schlüsselbund gespeichert"
-        : "Token einfügen"}
+      placeholder={settings?.hasToken ? "••••••••••••••••" : "Token einfügen"}
       bind:value={token}
     >
       {#snippet trailing()}
+        {#if !token && settings?.hasToken}
+          <span
+            class="flex shrink-0 items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-medium text-success"
+            title={settings.tokenStorage === "file" ? "In Datei gespeichert" : "Im Schlüsselbund gespeichert"}
+          >
+            <Icon name="check" size={10} stroke={3} />
+            gespeichert
+          </span>
+        {/if}
         {#if token}
           <button
             class="no-drag -mr-1 grid size-6 place-items-center rounded text-fg-subtle hover:text-fg"
