@@ -37,7 +37,11 @@ type Settings struct {
 	HasToken   bool   `json:"hasToken"`
 	Language   string `json:"language"`
 	ConfigPath string `json:"configPath"`
-	// KeyringError is set when the system keyring cannot be used.
+	// TokenStorage is "keyring" or "file".
+	TokenStorage string `json:"tokenStorage"`
+	// SecretsPath is the file used when TokenStorage is "file".
+	SecretsPath string `json:"secretsPath"`
+	// KeyringError is set when the selected token storage cannot be read.
 	KeyringError string `json:"keyringError,omitempty"`
 }
 
@@ -47,6 +51,19 @@ type SettingsInput struct {
 	// Token replaces the stored API token; empty keeps the current one.
 	Token    string `json:"token"`
 	Language string `json:"language"`
+	// TokenStorage switches the storage ("keyring" or "file"); empty keeps it.
+	// A stored token moves along when no new token is given.
+	TokenStorage string `json:"tokenStorage"`
+}
+
+// SaveResult is returned by SaveSettings.
+type SaveResult struct {
+	Settings Settings `json:"settings"`
+	// KeyringFailed is set when the token could not be stored in the keyring.
+	// The UI then offers the file fallback; the other settings were saved.
+	KeyringFailed bool `json:"keyringFailed"`
+	// Message explains a failure in German.
+	Message string `json:"message,omitempty"`
 }
 
 // ConnectionResult describes the outcome of a connection check.
@@ -64,21 +81,35 @@ type ConnectionResult struct {
 // Kimai account. It is shared by the services but not bound to the frontend.
 type Connection struct {
 	store   *config.Store
-	secrets config.Secrets
+	keyring config.Secrets
+	file    config.Secrets
 
 	mu       sync.Mutex
 	location *time.Location // Kimai user time zone, learned on connection check
 }
 
-// NewConnection creates the shared connection state.
-func NewConnection(store *config.Store, secrets config.Secrets) *Connection {
-	return &Connection{store: store, secrets: secrets}
+// NewConnection creates the shared connection state. keyring is the default
+// secret store, file the opt-in fallback.
+func NewConnection(store *config.Store, keyring, file config.Secrets) *Connection {
+	return &Connection{store: store, keyring: keyring, file: file}
+}
+
+// secrets returns the store selected in the configuration.
+func (c *Connection) secrets() config.Secrets {
+	return c.secretsFor(c.store.Get().TokenStorage)
+}
+
+func (c *Connection) secretsFor(storage string) config.Secrets {
+	if storage == config.StorageFile {
+		return c.file
+	}
+	return c.keyring
 }
 
 // Client builds a Kimai client from the stored settings.
 func (c *Connection) Client() (*kimai.Client, error) {
 	cfg := c.store.Get()
-	token, err := c.secrets.Get(config.SecretKimaiToken)
+	token, err := c.secrets().Get(config.SecretKimaiToken)
 	if err != nil {
 		if errors.Is(err, config.ErrSecretNotFound) {
 			return nil, kimai.ErrUnauthorized
@@ -109,9 +140,8 @@ func newClient(url, token string) (*kimai.Client, error) {
 
 // SettingsService manages configuration, the API token and the connection check.
 type SettingsService struct {
-	conn    *Connection
-	store   *config.Store
-	secrets config.Secrets
+	conn  *Connection
+	store *config.Store
 
 	mu   sync.Mutex
 	last *ConnectionResult
@@ -119,58 +149,94 @@ type SettingsService struct {
 
 // NewSettingsService creates the service.
 func NewSettingsService(conn *Connection) *SettingsService {
-	return &SettingsService{conn: conn, store: conn.store, secrets: conn.secrets}
+	return &SettingsService{conn: conn, store: conn.store}
 }
 
 // GetSettings returns the current settings.
 func (s *SettingsService) GetSettings() Settings {
 	cfg := s.store.Get()
-	out := Settings{KimaiURL: cfg.KimaiURL, Language: cfg.Language, ConfigPath: s.store.Path()}
-	_, err := s.secrets.Get(config.SecretKimaiToken)
+	out := Settings{
+		KimaiURL:     cfg.KimaiURL,
+		Language:     cfg.Language,
+		ConfigPath:   s.store.Path(),
+		TokenStorage: storageName(cfg.TokenStorage),
+	}
+	if f, ok := s.conn.file.(*config.FileSecrets); ok {
+		out.SecretsPath = f.Path
+	}
+	_, err := s.conn.secrets().Get(config.SecretKimaiToken)
 	switch {
 	case err == nil:
 		out.HasToken = true
 	case !errors.Is(err, config.ErrSecretNotFound):
-		out.KeyringError = keyringMessage
+		out.KeyringError = secretsErrorMessage(err)
 	}
 	return out
 }
 
 // SaveSettings validates and stores the settings. The API token goes to the
-// system keyring, everything else to config.json.
-func (s *SettingsService) SaveSettings(in SettingsInput) (Settings, error) {
+// selected secret store (system keyring by default), everything else to
+// config.json. A keyring failure is reported in the result, not as an error,
+// so the UI can offer the file fallback.
+func (s *SettingsService) SaveSettings(in SettingsInput) (SaveResult, error) {
 	url := strings.TrimSpace(in.KimaiURL)
 	if url != "" {
 		normalized, err := kimai.NormalizeBaseURL(url)
 		if err != nil {
-			return Settings{}, errors.New("Die Kimai-URL ist ungültig.")
+			return SaveResult{}, errors.New("Die Kimai-URL ist ungültig.")
 		}
 		url = normalized
 	}
-	if token := strings.TrimSpace(in.Token); token != "" {
-		if err := s.secrets.Set(config.SecretKimaiToken, token); err != nil {
-			return Settings{}, errors.New(keyringMessage)
+
+	cfg := s.store.Get()
+	oldStorage := storageName(cfg.TokenStorage)
+	newStorage := oldStorage
+	if in.TokenStorage != "" {
+		newStorage = storageName(in.TokenStorage)
+	}
+
+	token := strings.TrimSpace(in.Token)
+	if token == "" && newStorage != oldStorage {
+		// Move an existing token to the new storage.
+		if old, err := s.conn.secretsFor(oldStorage).Get(config.SecretKimaiToken); err == nil {
+			token = old
 		}
 	}
+	res := SaveResult{}
+	if token != "" {
+		if err := s.conn.secretsFor(newStorage).Set(config.SecretKimaiToken, token); err != nil {
+			res.Message = secretsErrorMessage(err)
+			res.KeyringFailed = newStorage == config.StorageKeyring
+			newStorage = oldStorage // keep using what worked before
+		} else if newStorage != oldStorage {
+			_ = s.conn.secretsFor(oldStorage).Delete(config.SecretKimaiToken)
+		}
+	}
+
 	err := s.store.Update(func(c *config.Config) {
 		c.KimaiURL = url
 		if in.Language != "" {
 			c.Language = in.Language
 		}
+		c.TokenStorage = newStorage
+		if newStorage == config.StorageKeyring {
+			c.TokenStorage = "" // default, keep config.json minimal
+		}
 	})
 	if err != nil {
-		return Settings{}, fmt.Errorf("Einstellungen konnten nicht gespeichert werden: %v", err)
+		return SaveResult{}, fmt.Errorf("Einstellungen konnten nicht gespeichert werden: %v", err)
 	}
 	s.mu.Lock()
 	s.last = nil
 	s.mu.Unlock()
-	return s.GetSettings(), nil
+	res.Settings = s.GetSettings()
+	return res, nil
 }
 
 // RemoveToken deletes the stored API token.
 func (s *SettingsService) RemoveToken() error {
-	if err := s.secrets.Delete(config.SecretKimaiToken); err != nil {
-		return errors.New(keyringMessage)
+	if err := s.conn.secrets().Delete(config.SecretKimaiToken); err != nil {
+		return errors.New(secretsErrorMessage(err))
 	}
 	s.mu.Lock()
 	s.last = nil
@@ -182,9 +248,9 @@ func (s *SettingsService) RemoveToken() error {
 // token falls back to the stored one, so an existing token can be re-tested.
 func (s *SettingsService) TestConnection(kimaiURL, token string) ConnectionResult {
 	if strings.TrimSpace(token) == "" {
-		stored, err := s.secrets.Get(config.SecretKimaiToken)
+		stored, err := s.conn.secrets().Get(config.SecretKimaiToken)
 		if err != nil && !errors.Is(err, config.ErrSecretNotFound) {
-			return result(StatusKeyring, keyringMessage, "")
+			return result(StatusKeyring, secretsErrorMessage(err), "")
 		}
 		token = stored
 	}
@@ -195,13 +261,17 @@ func (s *SettingsService) TestConnection(kimaiURL, token string) ConnectionResul
 // EventConnectionChanged.
 func (s *SettingsService) CheckConnection() ConnectionResult {
 	cfg := s.store.Get()
-	token, err := s.secrets.Get(config.SecretKimaiToken)
+	token, err := s.conn.secrets().Get(config.SecretKimaiToken)
 	var res ConnectionResult
 	switch {
 	case err != nil && !errors.Is(err, config.ErrSecretNotFound):
-		res = result(StatusKeyring, keyringMessage, cfg.KimaiURL)
-	case cfg.KimaiURL == "" || token == "":
+		res = result(StatusKeyring, secretsErrorMessage(err), cfg.KimaiURL)
+	case cfg.KimaiURL == "" && token == "":
 		res = result(StatusNotConfigured, "Noch keine Kimai-Verbindung eingerichtet.", cfg.KimaiURL)
+	case token == "":
+		res = result(StatusNotConfigured, "Kein API-Token gespeichert.", cfg.KimaiURL)
+	case cfg.KimaiURL == "":
+		res = result(StatusNotConfigured, "Keine Kimai-URL gespeichert.", cfg.KimaiURL)
 	default:
 		res = s.check(cfg.KimaiURL, token, true)
 	}
@@ -267,6 +337,22 @@ func result(status, message, baseURL string) ConnectionResult {
 
 const keyringMessage = "Der System-Schlüsselbund ist nicht erreichbar. Unter Linux wird ein Secret-Service-Dienst wie GNOME Keyring oder KWallet benötigt."
 
+func storageName(s string) string {
+	if s == config.StorageFile {
+		return config.StorageFile
+	}
+	return config.StorageKeyring
+}
+
+// secretsErrorMessage explains a secret store failure, including the
+// technical cause so users can report it.
+func secretsErrorMessage(err error) string {
+	if errors.Is(err, config.ErrKeyringUnavailable) {
+		return keyringMessage + " Details: " + err.Error()
+	}
+	return "Token-Speicher nicht lesbar: " + err.Error()
+}
+
 // DescribeError maps client errors to a status code and a German user message.
 func DescribeError(err error) (status, message string) {
 	switch {
@@ -291,7 +377,7 @@ func DescribeError(err error) (status, message string) {
 	case errors.Is(err, kimai.ErrUnexpectedResponse):
 		return StatusUnexpected, "Unerwartete Antwort vom Server. Ist das die URL deiner Kimai-Installation?"
 	case errors.Is(err, config.ErrKeyringUnavailable):
-		return StatusKeyring, keyringMessage
+		return StatusKeyring, secretsErrorMessage(err)
 	}
 	var apiErr *kimai.APIError
 	if errors.As(err, &apiErr) {

@@ -23,9 +23,11 @@ it in v3.1.
 
 ## Window
 
-- Frameless, transparent window of 380 × 500 px. The visible card is 360 × 480; the
-  10 px transparent gutter holds the CSS drop shadow (`--shadow-gutter` in
-  `frontend/src/app.css`). Rounded corners are drawn by CSS, so they look identical
+- Frameless, transparent window of 392 × 512 px. The visible card is 360 × 480; the
+  16 px transparent gutter holds the CSS drop shadow (`--shadow-gutter` in
+  `frontend/src/app.css`). The shadow must fit inside the gutter, otherwise it is
+  clipped at the window edge and shows up as a translucent box. The surface is
+  nearly opaque because Linux offers no blur behind windows. Rounded corners are drawn by CSS, so they look identical
   on X11 and Wayland.
 - The drag region is the title bar (`--wails-draggable: drag`); interactive children
   opt out with `no-drag`.
@@ -68,6 +70,11 @@ into `frontend/bindings` by `wails3 generate bindings` (run automatically during
 - The API token lives in the system keyring via `zalando/go-keyring`
   (service `kimai-tracker`, key `kimai-api-token`). The token is never sent back to
   the frontend; the UI only learns whether one is stored.
+- go-keyring ignores a dismissed Secret Service prompt and reports success without
+  storing anything. `config.Keyring.Set` therefore reads the value back and fails
+  loudly. On failure the UI offers an explicit opt-in fallback, `config.FileSecrets`
+  (`secrets.json`, mode 0600, unencrypted), selected via `tokenStorage: "file"`.
+  `--check-keyring` prints the Secret Service provider and does a round trip.
 
 ## Kimai client
 

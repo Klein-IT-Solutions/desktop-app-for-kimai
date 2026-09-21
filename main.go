@@ -17,10 +17,10 @@ import (
 var assets embed.FS
 
 // Window size including the transparent margin that holds the CSS drop shadow.
-// The visible card is 360×480 (see frontend/src/app.css, --shadow-gutter).
+// The visible card is 360×480 plus 2×16 px (frontend/src/app.css, --shadow-gutter).
 const (
-	windowWidth  = 380
-	windowHeight = 500
+	windowWidth  = 392
+	windowHeight = 512
 )
 
 func init() {
@@ -49,9 +49,17 @@ func openConfig() *config.Store {
 }
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "--check-keyring" {
+		os.Exit(checkKeyring())
+	}
+
 	var mainWindow *application.WebviewWindow
 
-	conn := app.NewConnection(openConfig(), config.Keyring{})
+	secretsPath, err := config.DefaultSecretsPath()
+	if err != nil {
+		log.Fatal(err)
+	}
+	conn := app.NewConnection(openConfig(), config.Keyring{}, &config.FileSecrets{Path: secretsPath})
 	settings := app.NewSettingsService(conn)
 
 	a := application.New(application.Options{

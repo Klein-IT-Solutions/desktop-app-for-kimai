@@ -26,6 +26,7 @@
     if (r.ok) return { tone: "bg-success", text: `${r.userName} · ${host(r.baseUrl)}` };
     if (r.status === "offline") return { tone: "bg-danger", text: "Offline – Kimai nicht erreichbar" };
     if (r.status === "unauthorized") return { tone: "bg-danger", text: "API-Token ungültig" };
+    if (r.status === "keyring") return { tone: "bg-danger", text: "Schlüsselbund nicht verfügbar" };
     return { tone: "bg-danger", text: "Verbindungsproblem" };
   });
 

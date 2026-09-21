@@ -76,3 +76,29 @@ func TestKeyring(t *testing.T) {
 		t.Fatalf("deleting a missing secret should succeed: %v", err)
 	}
 }
+
+func TestFileSecrets(t *testing.T) {
+	f := &FileSecrets{Path: filepath.Join(t.TempDir(), "secrets.json")}
+	if _, err := f.Get("a"); err != ErrSecretNotFound {
+		t.Fatalf("Get on empty: %v", err)
+	}
+	if err := f.Set("a", "1"); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(f.Path)
+	if err != nil || info.Mode().Perm() != 0o600 {
+		t.Fatalf("stat = %v, %v; want mode 600", info, err)
+	}
+	if v, err := f.Get("a"); err != nil || v != "1" {
+		t.Fatalf("Get = %q, %v", v, err)
+	}
+	if err := f.Delete("a"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(f.Path); !os.IsNotExist(err) {
+		t.Errorf("file should be removed when empty: %v", err)
+	}
+	if err := f.Delete("a"); err != nil {
+		t.Errorf("deleting a missing secret: %v", err)
+	}
+}

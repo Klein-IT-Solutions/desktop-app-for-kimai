@@ -111,8 +111,19 @@ Non-secret settings live in `~/.config/kimai-tracker/config.json`.
 
 Your Kimai user needs permission to use the API and to create/edit their own timesheets.
 
-If no keyring is available (e.g. a minimal window manager without GNOME Keyring or
-KWallet), the settings show a hint; install and start `gnome-keyring` in that case.
+If the keyring cannot be used (no Secret Service running, locked collection, dismissed
+unlock prompt, unsupported provider), saving shows the reason and offers to store the
+token **unencrypted** in `~/.config/kimai-tracker/secrets.json` (mode 0600) instead.
+You can move it back into the keyring from the settings later.
+
+To diagnose keyring problems, run:
+
+```bash
+./bin/kimai-tracker --check-keyring
+```
+
+It shows which program provides the keyring (GNOME Keyring, KWallet, KeePassXC …) and
+tests storing, reading and deleting a throw-away value.
 
 The URL may be entered with or without `https://` and with or without a trailing `/api`.
 Without a scheme, `https://` is assumed (`http://` for `localhost`).

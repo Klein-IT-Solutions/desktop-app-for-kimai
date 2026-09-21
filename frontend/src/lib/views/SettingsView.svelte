@@ -34,6 +34,11 @@
   let saving = $state(false);
   let result = $state<ConnectionResult | null>(null);
   let error = $state("");
+  let keyringFailure = $state("");
+  // Only shown while the keyring is the selected storage.
+  const keyringProblem = $derived(
+    keyringFailure || (settings?.tokenStorage !== "file" ? (settings?.keyringError ?? "") : ""),
+  );
 
   const dirty = $derived(
     settings !== null &&
@@ -49,7 +54,8 @@
       language = settings.language || "de";
       info = await AppService.Info();
       // Show the state of the stored connection right away.
-      if (connection.result && connection.result.status !== "not_configured") result = connection.result;
+      const r = connection.result;
+      if (r && r.status !== "not_configured" && r.status !== "keyring") result = r;
     } catch (e) {
       error = errorMessage(e);
     }
@@ -67,12 +73,22 @@
     }
   }
 
-  async function save() {
+  /** Saves the form. tokenStorage switches between keyring and file ("" keeps it). */
+  async function save(tokenStorage = "") {
     error = "";
+    keyringFailure = "";
     saving = true;
     try {
-      settings = await SettingsService.SaveSettings({ kimaiUrl: url, token, language });
+      const res = await SettingsService.SaveSettings({ kimaiUrl: url, token, language, tokenStorage });
+      settings = res.settings;
       url = settings.kimaiUrl;
+      if (res.keyringFailed) {
+        // Keep the typed token so the user can choose the file fallback.
+        keyringFailure = res.message ?? "";
+        result = null;
+        return;
+      }
+      if (res.message) error = res.message;
       token = "";
       showToken = false;
       result = await refreshConnection();
@@ -108,7 +124,11 @@
     <TextField
       label="API-Token"
       type={showToken ? "text" : "password"}
-      placeholder={settings?.hasToken ? "Im Schlüsselbund gespeichert" : "Token einfügen"}
+      placeholder={settings?.hasToken
+        ? settings.tokenStorage === "file"
+          ? "In Datei gespeichert"
+          : "Im Schlüsselbund gespeichert"
+        : "Token einfügen"}
       bind:value={token}
     >
       {#snippet trailing()}
@@ -140,20 +160,47 @@
     </div>
   </div>
 
-  {#if settings?.keyringError}
-    <div class="mt-3 rounded-[10px] bg-danger/12 px-3 py-2.5 text-[12px] leading-snug">{settings.keyringError}</div>
-  {/if}
-
   <div class="mt-3 flex gap-2">
     <Button onclick={test} busy={testing} disabled={!url.trim() || (!token.trim() && !settings?.hasToken)}>
       Verbindung testen
     </Button>
-    <Button variant="primary" onclick={save} busy={saving} disabled={!dirty}>Speichern</Button>
+    <Button variant="primary" onclick={() => save()} busy={saving} disabled={!dirty}>Speichern</Button>
   </div>
+
+  {#if keyringProblem}
+    <div class="mt-3 rounded-[10px] bg-danger/12 px-3 py-2.5 text-[12px] leading-snug">
+      <div class="font-medium">
+        {keyringFailure ? "Token konnte nicht im Schlüsselbund gespeichert werden." : "Der Schlüsselbund ist nicht verfügbar."}
+      </div>
+      <details class="mt-1 text-[11px] text-fg-muted">
+        <summary class="cursor-pointer">Details</summary>
+        <div class="mt-1 break-words select-text">{keyringProblem}</div>
+      </details>
+      {#if token.trim()}
+        <button class="mt-2 font-medium text-accent hover:opacity-75" onclick={() => save("file")}>
+          Stattdessen unverschlüsselt in Datei speichern
+        </button>
+      {:else}
+        <div class="mt-2 text-fg-muted">Token eingeben, um ihn stattdessen in einer Datei zu speichern.</div>
+      {/if}
+    </div>
+  {/if}
+
+  {#if settings?.tokenStorage === "file"}
+    <div class="mt-3 rounded-[10px] bg-warning/15 px-3 py-2.5 text-[12px] leading-snug">
+      Der Token liegt unverschlüsselt (nur für dich lesbar) in
+      <span class="break-all text-fg-muted select-text">{settings.secretsPath}</span>.
+      {#if settings.hasToken}
+        <button class="mt-1 block font-medium text-accent hover:opacity-75" onclick={() => save("keyring")}>
+          In den Schlüsselbund verschieben
+        </button>
+      {/if}
+    </div>
+  {/if}
 
   {#if error}
     <div class="mt-3 rounded-[10px] bg-danger/12 px-3 py-2.5 text-[12px] leading-snug">{error}</div>
-  {:else if result}
+  {:else if result && result.status !== "keyring"}
     {#key result.checkedAt}
       <div class="mt-3"><StatusBanner {result} /></div>
     {/key}

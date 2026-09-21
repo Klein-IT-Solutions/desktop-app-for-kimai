@@ -21,7 +21,15 @@ type Config struct {
 	KimaiURL string `json:"kimaiUrl"`
 	// Language is the UI / transcription language as ISO 639-1 code.
 	Language string `json:"language"`
+	// TokenStorage is where secrets live: "" / "keyring" (default) or "file".
+	TokenStorage string `json:"tokenStorage,omitempty"`
 }
+
+// Token storage backends.
+const (
+	StorageKeyring = "keyring"
+	StorageFile    = "file"
+)
 
 // Default returns the configuration used when no file exists yet.
 func Default() Config {

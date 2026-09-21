@@ -38,6 +38,24 @@ export interface Info {
 }
 
 /**
+ * SaveResult is returned by SaveSettings.
+ */
+export interface SaveResult {
+    "settings": Settings;
+
+    /**
+     * KeyringFailed is set when the token could not be stored in the keyring.
+     * The UI then offers the file fallback; the other settings were saved.
+     */
+    "keyringFailed": boolean;
+
+    /**
+     * Message explains a failure in German.
+     */
+    "message"?: string;
+}
+
+/**
  * Settings is the settings view model. The token itself is never sent to the UI.
  */
 export interface Settings {
@@ -47,7 +65,17 @@ export interface Settings {
     "configPath": string;
 
     /**
-     * KeyringError is set when the system keyring cannot be used.
+     * TokenStorage is "keyring" or "file".
+     */
+    "tokenStorage": string;
+
+    /**
+     * SecretsPath is the file used when TokenStorage is "file".
+     */
+    "secretsPath": string;
+
+    /**
+     * KeyringError is set when the selected token storage cannot be read.
      */
     "keyringError"?: string;
 }
@@ -63,4 +91,10 @@ export interface SettingsInput {
      */
     "token": string;
     "language": string;
+
+    /**
+     * TokenStorage switches the storage ("keyring" or "file"); empty keeps it.
+     * A stored token moves along when no new token is given.
+     */
+    "tokenStorage": string;
 }

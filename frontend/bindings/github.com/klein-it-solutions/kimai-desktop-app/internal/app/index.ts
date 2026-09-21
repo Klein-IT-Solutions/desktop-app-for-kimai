@@ -11,6 +11,7 @@ export {
 export type {
     ConnectionResult,
     Info,
+    SaveResult,
     Settings,
     SettingsInput
 } from "./models.js";

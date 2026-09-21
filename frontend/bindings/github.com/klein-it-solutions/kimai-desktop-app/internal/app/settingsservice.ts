@@ -46,9 +46,11 @@ export function RemoveToken(): $CancellablePromise<void> {
 
 /**
  * SaveSettings validates and stores the settings. The API token goes to the
- * system keyring, everything else to config.json.
+ * selected secret store (system keyring by default), everything else to
+ * config.json. A keyring failure is reported in the result, not as an error,
+ * so the UI can offer the file fallback.
  */
-export function SaveSettings($in: $models.SettingsInput): $CancellablePromise<$models.Settings> {
+export function SaveSettings($in: $models.SettingsInput): $CancellablePromise<$models.SaveResult> {
     return $Call.ByID(2006059331, $in);
 }
 
