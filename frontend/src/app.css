@@ -138,9 +138,12 @@ textarea {
   font-feature-settings: "tnum";
 }
 
-:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
-  outline-offset: 2px;
+/* In the base layer so utilities such as outline-none can override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+    outline-offset: 2px;
+  }
 }
 
 ::-webkit-scrollbar {

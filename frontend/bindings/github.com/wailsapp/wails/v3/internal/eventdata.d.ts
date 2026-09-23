@@ -14,6 +14,7 @@ declare module "@wailsio/runtime" {
         interface CustomEvents {
             "connection:changed": app$0.ConnectionResult;
             "theme:changed": boolean;
+            "tracker:changed": app$0.TrackerState;
         }
     }
 }

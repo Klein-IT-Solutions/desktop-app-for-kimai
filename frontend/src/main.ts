@@ -5,9 +5,11 @@ import App from "./App.svelte";
 import { initTheme } from "./lib/theme";
 import { initConnection } from "./lib/connection.svelte";
 import { initPlatform } from "./lib/platform";
+import { initTracker } from "./lib/tracker.svelte";
 
 initTheme();
 initConnection();
+initTracker();
 
 initPlatform().finally(() => {
   mount(App, { target: document.getElementById("app")! });

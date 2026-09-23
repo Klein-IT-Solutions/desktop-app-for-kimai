@@ -106,13 +106,16 @@ func (c *Connection) secretsFor(storage string) config.Secrets {
 	return c.keyring
 }
 
+// ErrNoToken is returned when no API token is stored.
+var ErrNoToken = errors.New("no API token stored")
+
 // Client builds a Kimai client from the stored settings.
 func (c *Connection) Client() (*kimai.Client, error) {
 	cfg := c.store.Get()
 	token, err := c.secrets().Get(config.SecretKimaiToken)
 	if err != nil {
 		if errors.Is(err, config.ErrSecretNotFound) {
-			return nil, kimai.ErrUnauthorized
+			return nil, ErrNoToken
 		}
 		return nil, err
 	}

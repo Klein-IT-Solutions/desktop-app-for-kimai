@@ -95,30 +95,7 @@ func (s *Store) Update(fn func(*Config)) error {
 }
 
 func (s *Store) write(cfg Config) error {
-	if err := os.MkdirAll(filepath.Dir(s.path), 0o700); err != nil {
-		return fmt.Errorf("create config directory: %w", err)
-	}
-	data, err := json.MarshalIndent(cfg, "", "  ")
-	if err != nil {
-		return err
-	}
-	tmp, err := os.CreateTemp(filepath.Dir(s.path), ".config-*.json")
-	if err != nil {
-		return fmt.Errorf("write config: %w", err)
-	}
-	defer os.Remove(tmp.Name())
-	if _, err := tmp.Write(append(data, '\n')); err != nil {
-		tmp.Close()
-		return fmt.Errorf("write config: %w", err)
-	}
-	if err := tmp.Chmod(0o600); err != nil {
-		tmp.Close()
-		return fmt.Errorf("write config: %w", err)
-	}
-	if err := tmp.Close(); err != nil {
-		return fmt.Errorf("write config: %w", err)
-	}
-	if err := os.Rename(tmp.Name(), s.path); err != nil {
+	if err := SaveJSON(s.path, cfg); err != nil {
 		return fmt.Errorf("write config: %w", err)
 	}
 	return nil

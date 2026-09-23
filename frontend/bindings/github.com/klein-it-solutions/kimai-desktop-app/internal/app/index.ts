@@ -3,15 +3,22 @@
 
 import * as AppService from "./appservice.js";
 import * as SettingsService from "./settingsservice.js";
+import * as TrackerService from "./trackerservice.js";
 export {
     AppService,
-    SettingsService
+    SettingsService,
+    TrackerService
 };
 
 export type {
     ConnectionResult,
     Info,
+    Option,
+    OptionList,
     SaveResult,
+    Selection,
     Settings,
-    SettingsInput
+    SettingsInput,
+    StartRequest,
+    TrackerState
 } from "./models.js";

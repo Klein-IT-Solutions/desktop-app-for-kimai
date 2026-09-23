@@ -38,6 +38,38 @@ export interface Info {
 }
 
 /**
+ * Option is one selectable customer, project or activity.
+ */
+export interface Option {
+    "id": number;
+    "name": string;
+    "hint"?: string;
+    "color"?: string;
+
+    /**
+     * Recent marks recently used entries (sorted to the top).
+     */
+    "recent": boolean;
+}
+
+/**
+ * OptionList is returned for each picker.
+ */
+export interface OptionList {
+    "items": Option[] | null;
+
+    /**
+     * Stale is set when Kimai could not be reached and cached data is shown.
+     */
+    "stale": boolean;
+
+    /**
+     * Message explains why the list is stale.
+     */
+    "message"?: string;
+}
+
+/**
  * SaveResult is returned by SaveSettings.
  */
 export interface SaveResult {
@@ -53,6 +85,14 @@ export interface SaveResult {
      * Message explains a failure in German.
      */
     "message"?: string;
+}
+
+/**
+ * Selection identifies a chosen entry together with its display name.
+ */
+export interface Selection {
+    "id": number;
+    "name": string;
 }
 
 /**
@@ -97,4 +137,31 @@ export interface SettingsInput {
      * A stored token moves along when no new token is given.
      */
     "tokenStorage": string;
+}
+
+/**
+ * StartRequest starts a new timer.
+ */
+export interface StartRequest {
+    "customer": Selection;
+    "project": Selection;
+    "activity": Selection;
+    "description": string;
+}
+
+/**
+ * TrackerState is the timer state shown in the UI.
+ */
+export interface TrackerState {
+    "running": boolean;
+    "timesheetId": number;
+
+    /**
+     * RFC 3339
+     */
+    "begin"?: string;
+    "customer": Selection;
+    "project": Selection;
+    "activity": Selection;
+    "description": string;
 }

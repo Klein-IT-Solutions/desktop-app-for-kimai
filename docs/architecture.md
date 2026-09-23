@@ -99,5 +99,20 @@ full start → update → stop flow against a real instance (`make kimai-up`).
 
 - `AppService` – app info, dark mode, opening links.
 - `SettingsService` – settings, token, connection test; emits `connection:changed`.
-- `Connection` (not bound) – shared config/secret access and the Kimai client factory
-  for the services added in later steps.
+- `TrackerService` – lists, start/stop, description, sync; emits `tracker:changed`.
+  A background loop reconciles the running timer with Kimai every 60 s (stopped in
+  the web UI, started elsewhere) and re-checks an offline connection. Kimai errors that
+  indicate connection problems trigger an immediate connection check.
+- `Connection` (not bound) – shared config/secret access and the Kimai client factory.
+
+## Tracking data
+
+- `Catalog` caches customer/project/activity lists in `~/.cache/kimai-tracker/cache.json`
+  (fresh for 10 minutes, used as stale fallback when offline) and keeps recently used
+  entries plus the last selection and draft description in
+  `~/.config/kimai-tracker/state.json`. Both are bound to the Kimai URL; switching
+  instances starts clean.
+- Lists show recently used entries first (most recent first, max. 5), the rest
+  alphabetically.
+- The description of a running timer is PATCHed ~0.7 s after typing stops; without a
+  running timer it is kept as draft for the next start.

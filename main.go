@@ -26,6 +26,7 @@ const (
 func init() {
 	application.RegisterEvent[bool]("theme:changed")
 	application.RegisterEvent[app.ConnectionResult](app.EventConnectionChanged)
+	application.RegisterEvent[app.TrackerState](app.EventTrackerChanged)
 }
 
 // openConfig loads the configuration. A corrupt file is moved aside so the
@@ -48,6 +49,19 @@ func openConfig() *config.Store {
 	return store
 }
 
+// openCatalog opens the list cache (~/.cache) and UI state (~/.config).
+func openCatalog() *app.Catalog {
+	cachePath, err := config.DefaultCachePath("cache.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	statePath, err := config.DefaultStatePath("state.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return app.NewCatalog(cachePath, statePath)
+}
+
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "--check-keyring" {
 		os.Exit(checkKeyring())
@@ -61,6 +75,7 @@ func main() {
 	}
 	conn := app.NewConnection(openConfig(), config.Keyring{}, &config.FileSecrets{Path: secretsPath})
 	settings := app.NewSettingsService(conn)
+	tracker := app.NewTrackerService(conn, settings, openCatalog())
 
 	a := application.New(application.Options{
 		Name:        "Kimai Tracker",
@@ -68,6 +83,7 @@ func main() {
 		Services: []application.Service{
 			application.NewService(app.NewAppService()),
 			application.NewService(settings),
+			application.NewService(tracker),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),

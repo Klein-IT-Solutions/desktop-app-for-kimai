@@ -2,14 +2,24 @@
   import Icon from "./Icon.svelte";
 
   let {
-    value = $bindable(""),
+    value = "",
+    oninput,
+    status = "",
     micAvailable = false,
-  }: { value?: string; micAvailable?: boolean } = $props();
+  }: {
+    value?: string;
+    oninput: (text: string) => void;
+    status?: "" | "saving" | "saved" | "error";
+    micAvailable?: boolean;
+  } = $props();
 </script>
 
-<div class="flex items-start gap-2 rounded-[10px] bg-field p-1.5 pl-3 shadow-[inset_0_0_0_0.5px_var(--hairline)] transition-colors focus-within:bg-field-hover">
+<div
+  class="relative flex items-start gap-2 rounded-[10px] bg-field p-1.5 pl-3 shadow-[inset_0_0_0_0.5px_var(--hairline)] transition-colors focus-within:bg-field-hover"
+>
   <textarea
-    bind:value
+    {value}
+    oninput={(e) => oninput(e.currentTarget.value)}
     rows="2"
     placeholder="Woran arbeitest du?"
     class="min-h-[38px] flex-1 resize-none bg-transparent py-1 text-[13px] leading-snug text-fg outline-none placeholder:text-fg-subtle"
@@ -22,4 +32,12 @@
   >
     <Icon name="mic" size={17} />
   </button>
+  {#if status}
+    <span
+      class="absolute right-12 bottom-1.5 text-[10px] transition-opacity
+        {status === 'error' ? 'text-danger' : status === 'saved' ? 'text-success' : 'text-fg-subtle'}"
+    >
+      {status === "saving" ? "Speichert …" : status === "saved" ? "In Kimai gespeichert" : "Nicht gespeichert"}
+    </span>
+  {/if}
 </div>

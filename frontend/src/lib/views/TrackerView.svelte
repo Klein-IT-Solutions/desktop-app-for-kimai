@@ -1,23 +1,82 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import { slide } from "svelte/transition";
+  import { TrackerService, type Option } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
   import SelectRow from "../components/SelectRow.svelte";
   import TimerButton from "../components/TimerButton.svelte";
   import DescriptionField from "../components/DescriptionField.svelte";
+  import Picker from "../components/Picker.svelte";
   import { connection } from "../connection.svelte";
+  import {
+    canStart,
+    selectActivity,
+    selectCustomer,
+    selectProject,
+    setDescription,
+    toggleTimer,
+    tracker,
+  } from "../tracker.svelte";
 
   let { onOpenSettings }: { onOpenSettings: () => void } = $props();
 
-  // Step 1: a purely local demo timer to try out the look & feel.
-  // Step 3 replaces this with the Kimai-backed tracker state.
-  let startedAt = $state<number | null>(null);
+  type PickerKind = "customer" | "project" | "activity" | null;
+  let picker = $state<PickerKind>(null);
+
   let now = $state(Date.now());
-  let description = $state("");
-
-  const running = $derived(startedAt !== null);
-  const elapsed = $derived(startedAt ? (now - startedAt) / 1000 : 0);
-
   const tick = setInterval(() => (now = Date.now()), 250);
   onDestroy(() => clearInterval(tick));
+
+  const s = $derived(tracker.state);
+  const connected = $derived(connection.result?.ok ?? false);
+  const elapsed = $derived(s.running && s.begin ? Math.max(0, (now - Date.parse(s.begin)) / 1000) : 0);
+  const locked = $derived(s.running || tracker.busy);
+
+  // After a choice, open the next picker – or pick automatically when there is only one option.
+  async function afterCustomer() {
+    const items = (await TrackerService.Projects(s.customer.id, false).catch(() => null))?.items ?? [];
+    if (items.length === 1) {
+      selectProject(items[0]);
+      return afterProject();
+    }
+    picker = "project";
+  }
+
+  async function afterProject() {
+    const items = (await TrackerService.Activities(s.project.id, false).catch(() => null))?.items ?? [];
+    if (items.length === 1) {
+      selectActivity(items[0]);
+      picker = null;
+      return;
+    }
+    picker = s.activity.id ? null : "activity";
+  }
+
+  function onCustomer(o: Option) {
+    const changed = o.id !== s.customer.id;
+    selectCustomer(o);
+    picker = null;
+    if (changed || !s.project.id) afterCustomer();
+  }
+
+  function onProject(o: Option) {
+    const changed = o.id !== s.project.id;
+    selectProject(o);
+    picker = null;
+    if (changed || !s.activity.id) afterProject();
+  }
+
+  function onActivity(o: Option) {
+    selectActivity(o);
+    picker = null;
+  }
+
+  function onKey(e: KeyboardEvent) {
+    // Ctrl/Cmd+Enter starts or stops the timer from anywhere in the window.
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !picker) {
+      if (s.running || (canStart() && connected)) toggleTimer();
+      e.preventDefault();
+    }
+  }
 
   const status = $derived.by(() => {
     const r = connection.result;
@@ -38,26 +97,76 @@
     }
   }
 
-  function toggle() {
-    startedAt = running ? null : Date.now();
-    now = Date.now();
-  }
+  const hint = $derived.by(() => {
+    if (s.running) return "";
+    if (!connected) return "";
+    if (!s.customer.id) return "Kunde auswählen";
+    if (!s.project.id) return "Projekt auswählen";
+    if (!s.activity.id) return "Tätigkeit auswählen";
+    return "";
+  });
 </script>
 
-<div class="flex h-full flex-col px-4 pt-1 pb-3">
+<svelte:window onkeydown={onKey} />
+
+<div class="relative flex h-full flex-col px-4 pt-1 pb-3">
   <section
-    class="overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_0.5px_var(--hairline)] [&>*+*]:border-t [&>*+*]:border-hairline"
+    class="overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_0.5px_var(--hairline)] transition-opacity [&>*+*]:border-t [&>*+*]:border-hairline
+      {s.running ? 'opacity-80' : ''}"
   >
-    <SelectRow icon="building" label="Kunde" disabled />
-    <SelectRow icon="folder" label="Projekt" disabled />
-    <SelectRow icon="tag" label="Tätigkeit" disabled />
+    <SelectRow icon="building" label="Kunde" value={s.customer.name} disabled={locked} onclick={() => (picker = "customer")} />
+    <SelectRow
+      icon="folder"
+      label="Projekt"
+      value={s.project.name}
+      placeholder={s.customer.id ? "Auswählen" : "–"}
+      disabled={locked || !s.customer.id}
+      onclick={() => (picker = "project")}
+    />
+    <SelectRow
+      icon="tag"
+      label="Tätigkeit"
+      value={s.activity.name}
+      placeholder={s.project.id ? "Auswählen" : "–"}
+      disabled={locked || !s.project.id}
+      onclick={() => (picker = "activity")}
+    />
   </section>
 
-  <div class="flex flex-1 items-center justify-center py-2">
-    <TimerButton {running} {elapsed} ontoggle={toggle} />
+  <div class="flex flex-1 flex-col items-center justify-center gap-2 py-2">
+    <TimerButton
+      running={s.running}
+      {elapsed}
+      disabled={tracker.busy || (!s.running && (!canStart() || !connected))}
+      ontoggle={toggleTimer}
+    />
+    <div class="h-4 text-[11px] text-fg-subtle">
+      {#if tracker.busy}
+        {s.running ? "Wird gestoppt …" : "Wird gestartet …"}
+      {:else if s.running && s.begin}
+        seit {new Date(s.begin).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
+      {:else}
+        {hint}
+      {/if}
+    </div>
   </div>
 
-  <DescriptionField bind:value={description} />
+  {#if tracker.error}
+    <button
+      transition:slide={{ duration: 180 }}
+      class="mb-2 rounded-[10px] bg-danger/12 px-3 py-2 text-left text-[12px] leading-snug"
+      title="Ausblenden"
+      onclick={() => (tracker.error = "")}
+    >
+      {tracker.error}
+    </button>
+  {/if}
+
+  <DescriptionField
+    value={s.description}
+    oninput={setDescription}
+    status={s.running ? tracker.descriptionStatus : ""}
+  />
 
   <button
     class="mt-2.5 flex min-w-0 items-center justify-center gap-1.5 text-[11px] text-fg-subtle transition-colors hover:text-fg-muted"
@@ -66,4 +175,33 @@
     <span class="size-1.5 shrink-0 rounded-full transition-colors {status.tone}"></span>
     <span class="truncate">{status.text}</span>
   </button>
+
+  {#if picker === "customer"}
+    <Picker
+      title="Kunde"
+      placeholder="Kunde suchen …"
+      selectedId={s.customer.id}
+      load={(r) => TrackerService.Customers(r)}
+      onselect={onCustomer}
+      onclose={() => (picker = null)}
+    />
+  {:else if picker === "project"}
+    <Picker
+      title="Projekt"
+      placeholder="Projekt suchen …"
+      selectedId={s.project.id}
+      load={(r) => TrackerService.Projects(s.customer.id, r)}
+      onselect={onProject}
+      onclose={() => (picker = null)}
+    />
+  {:else if picker === "activity"}
+    <Picker
+      title="Tätigkeit"
+      placeholder="Tätigkeit suchen …"
+      selectedId={s.activity.id}
+      load={(r) => TrackerService.Activities(s.project.id, r)}
+      onselect={onActivity}
+      onclose={() => (picker = null)}
+    />
+  {/if}
 </div>

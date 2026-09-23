@@ -28,5 +28,5 @@
   <span class="min-w-0 flex-1 truncate text-right {value ? 'text-fg' : 'text-fg-subtle'}">
     {value || placeholder}
   </span>
-  <span class="text-fg-subtle"><Icon name="chevronRight" size={13} stroke={2.2} /></span>
+  <span class="text-fg-subtle transition-opacity {disabled ? 'opacity-0' : ''}"><Icon name="chevronRight" size={13} stroke={2.2} /></span>
 </button>

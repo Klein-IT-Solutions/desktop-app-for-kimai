@@ -3,8 +3,8 @@
 A minimalist, open-source desktop time tracker for [Kimai](https://www.kimai.org) –
 built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind CSS.
 
-> **Status:** early development (step 2 of 6 – settings & Kimai connection). Tracking,
-> tray, hotkey and voice input are being added step by step, see [Roadmap](#roadmap).
+> **Status:** early development (step 3 of 6 – time tracking works). Tray, hotkey,
+> voice input and packaging are being added step by step, see [Roadmap](#roadmap).
 
 | Light | Dark |
 | ----- | ---- |
@@ -18,8 +18,14 @@ built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind 
 - Native-looking window buttons per platform (macOS, Windows, GNOME, KDE), honouring
   the GNOME button layout (left/right, minimize shown or hidden)
 - Automatic light/dark mode following the system
-- Customer → project → activity selection with search and recently used entries *(step 3)*
-- Big start/stop button with live elapsed time; picks up a timer already running in Kimai *(step 3)*
+- Customer → project → activity selection: searchable lists, keyboard navigation,
+  recently used entries on top; the next list opens automatically and single
+  options are picked for you
+- Big start/stop button with live elapsed time (Ctrl+Enter); picks up a timer already
+  running in Kimai and notices when it is stopped elsewhere (synced every 60 s)
+- Description can be edited while the timer runs and is saved to Kimai automatically
+- Works with flaky connections: lists are cached locally, the connection status
+  recovers on its own
 - Runs in the background: tray icon with status, global hotkey, notifications *(step 4)*
 - Voice input for the description via local whisper.cpp or an OpenAI-compatible API *(step 5)*
 - API token stored in the system keyring, never in plain text
@@ -165,7 +171,7 @@ See [docs/architecture.md](docs/architecture.md) for technical decisions.
 
 1. ✅ Wails shell with frameless, styled window
 2. ✅ Settings + Kimai client including connection test
-3. ⏳ Customer/project/activity flow and start/stop
+3. ✅ Customer/project/activity flow and start/stop
 4. ⏳ Tray, global hotkey, background operation
 5. ⏳ Voice input
 6. ⏳ Packaging (.deb, AppImage) and CI; later macOS/Windows
