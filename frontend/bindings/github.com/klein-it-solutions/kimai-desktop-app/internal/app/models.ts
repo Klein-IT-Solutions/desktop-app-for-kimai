@@ -4,6 +4,9 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
 import * as desktop$0 from "../desktop/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as hotkey$0 from "../hotkey/models.js";
 
 /**
  * ConnectionResult describes the outcome of a connection check.
@@ -137,6 +140,19 @@ export interface SettingsInput {
      * A stored token moves along when no new token is given.
      */
     "tokenStorage": string;
+}
+
+/**
+ * ShellStatus describes background features for the settings UI.
+ */
+export interface ShellStatus {
+    "trayAvailable": boolean;
+    "autostart": boolean;
+    "autostartSupported": boolean;
+    "notifications": boolean;
+    "hotkey": hotkey$0.Status;
+    "toggleCommand": string;
+    "timerCommand": string;
 }
 
 /**

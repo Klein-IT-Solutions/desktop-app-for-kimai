@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { Application, Window } from "@wailsio/runtime";
+  import { Window } from "@wailsio/runtime";
+  import { ShellService } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
   import type { WindowControls } from "../platform";
 
   let { controls }: { controls: WindowControls } = $props();
 
-  // Closing quits for now. Once the tray exists (step 4) this hides the window instead.
+  // Closing hides the window to the tray (or minimises it when there is no tray).
   const actions: Record<string, () => void> = {
-    close: () => Application.Quit(),
+    close: () => ShellService.CloseWindow(),
     minimize: () => Window.Minimise(),
   };
   const labels: Record<string, string> = { close: "Schließen", minimize: "Minimieren" };

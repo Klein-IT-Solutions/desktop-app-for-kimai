@@ -23,7 +23,14 @@ type Config struct {
 	Language string `json:"language"`
 	// TokenStorage is where secrets live: "" / "keyring" (default) or "file".
 	TokenStorage string `json:"tokenStorage,omitempty"`
+	// Hotkey is the global shortcut to show/hide the window ("" disables it).
+	Hotkey string `json:"hotkey"`
+	// Notifications enables desktop notifications on start/stop.
+	Notifications bool `json:"notifications"`
 }
+
+// DefaultHotkey toggles the window.
+const DefaultHotkey = "Super+Shift+T"
 
 // Token storage backends.
 const (
@@ -33,7 +40,7 @@ const (
 
 // Default returns the configuration used when no file exists yet.
 func Default() Config {
-	return Config{Language: "de"}
+	return Config{Language: "de", Hotkey: DefaultHotkey, Notifications: true}
 }
 
 // Store reads and writes the configuration file. It is safe for concurrent use.

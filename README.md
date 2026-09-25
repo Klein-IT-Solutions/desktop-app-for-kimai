@@ -3,8 +3,10 @@
 A minimalist, open-source desktop time tracker for [Kimai](https://www.kimai.org) –
 built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind CSS.
 
-> **Status:** early development (step 3 of 6 – time tracking works). Tray, hotkey,
-> voice input and packaging are being added step by step, see [Roadmap](#roadmap).
+Developed and maintained by **[Klein IT Solutions](https://klein-it.solutions)**.
+
+> **Status:** early development (step 4 of 6 – tracking and background operation work).
+> Voice input and packaging are being added step by step, see [Roadmap](#roadmap).
 
 | Light | Dark |
 | ----- | ---- |
@@ -26,7 +28,10 @@ built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind 
 - Description can be edited while the timer runs and is saved to Kimai automatically
 - Works with flaky connections: lists are cached locally, the connection status
   recovers on its own
-- Runs in the background: tray icon with status, global hotkey, notifications *(step 4)*
+- Runs in the background: tray icon with status, running time and start/stop; closing
+  the window hides it to the tray
+- Global hotkey to show/hide the window (default `Super+Shift+T`, configurable)
+- Desktop notifications on start/stop, optional start at login
 - Voice input for the description via local whisper.cpp or an OpenAI-compatible API *(step 5)*
 - API token stored in the system keyring, never in plain text
 - Connection test with clear messages for wrong URL, invalid token (401), missing
@@ -144,6 +149,39 @@ Without a scheme, `https://` is assumed (`http://` for `localhost`).
 - **Wayland vs. X11:** Both are supported. Wayland restrictions for the global hotkey
   are documented together with step 4.
 
+## Background operation
+
+**Tray icon.** Shows whether a timer runs (grey / green), the running time and project,
+and lets you start/stop the timer, show the window, open the settings or quit.
+Closing the window hides it to the tray; quitting does not stop a running timer – it
+keeps running in Kimai.
+
+- GNOME needs the *AppIndicator and KStatusNotifierItem Support* extension (pre-installed
+  and enabled on Ubuntu). Without a tray, closing the window minimises it instead.
+- KDE Plasma, Xfce, Cinnamon, MATE and others show the icon out of the box.
+
+**Global hotkey** (default `Super+Shift+T`, change it in *Settings → Background*):
+
+| Session | How it works |
+| ------- | ------------ |
+| X11 | Registered directly with the X server. If another app already uses the combination, the settings say so. |
+| Wayland | Apps may not grab keys on Wayland. Kimai Tracker uses the XDG *GlobalShortcuts* portal (KDE Plasma 6, GNOME 48+); your desktop asks once to confirm the shortcut. |
+| Wayland without portal support | Use the fallback below. |
+
+**Fallback for any desktop:** create a custom keyboard shortcut in your desktop settings
+that runs one of these commands – they are forwarded to the running app:
+
+```bash
+kimai-tracker --toggle   # show/hide the window
+kimai-tracker --timer    # start/stop the timer (last selection)
+```
+
+GNOME: *Settings → Keyboard → Keyboard Shortcuts → Custom Shortcuts*.
+KDE: *System Settings → Shortcuts → Add New → Command or Script*.
+
+**Start at login** creates `~/.config/autostart/kimai-tracker.desktop`; the app then
+starts hidden in the tray (`--hidden`).
+
 ## Project structure
 
 ```
@@ -151,7 +189,9 @@ Without a scheme, `https://` is assumed (`http://` for `localhost`).
 ├── main.go                 # Wails application & window setup
 ├── internal/
 │   ├── app/                # Services exposed to the frontend
-│   ├── config/             # Configuration & keyring
+│   ├── config/             # Configuration, keyring, JSON state files
+│   ├── desktop/            # Window controls, transparency, tray check, autostart
+│   ├── hotkey/             # Global shortcut (X11 grab, Wayland portal)
 │   ├── kimai/              # Kimai REST client with tests
 │   └── voice/              # Recording & transcription      (step 5)
 ├── frontend/               # Svelte + TypeScript + Tailwind UI
@@ -172,10 +212,16 @@ See [docs/architecture.md](docs/architecture.md) for technical decisions.
 1. ✅ Wails shell with frameless, styled window
 2. ✅ Settings + Kimai client including connection test
 3. ✅ Customer/project/activity flow and start/stop
-4. ⏳ Tray, global hotkey, background operation
+4. ✅ Tray, global hotkey, background operation
 5. ⏳ Voice input
 6. ⏳ Packaging (.deb, AppImage) and CI; later macOS/Windows
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © Klein IT Solutions and the Kimai Tracker contributors.
+
+Kimai Tracker is an independent project and not affiliated with the Kimai project.
+
+---
+
+<sub>Made with care by <a href="https://klein-it.solutions">Klein IT Solutions</a>.</sub>

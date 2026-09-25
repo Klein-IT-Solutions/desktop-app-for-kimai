@@ -7,6 +7,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
+	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 
 	"github.com/klein-it-solutions/kimai-desktop-app/internal/app"
 	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
@@ -27,6 +28,8 @@ func init() {
 	application.RegisterEvent[bool]("theme:changed")
 	application.RegisterEvent[app.ConnectionResult](app.EventConnectionChanged)
 	application.RegisterEvent[app.TrackerState](app.EventTrackerChanged)
+	application.RegisterEvent[app.ShellStatus](app.EventShellChanged)
+	application.RegisterEvent[string](app.EventNavigate)
 }
 
 // openConfig loads the configuration. A corrupt file is moved aside so the
@@ -73,9 +76,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	conn := app.NewConnection(openConfig(), config.Keyring{}, &config.FileSecrets{Path: secretsPath})
+	store := openConfig()
+	conn := app.NewConnection(store, config.Keyring{}, &config.FileSecrets{Path: secretsPath})
 	settings := app.NewSettingsService(conn)
 	tracker := app.NewTrackerService(conn, settings, openCatalog())
+	notifier := notifications.New()
+	shell := app.NewShell(store, tracker, notifier)
 
 	a := application.New(application.Options{
 		Name:        "Kimai Tracker",
@@ -84,6 +90,8 @@ func main() {
 			application.NewService(app.NewAppService()),
 			application.NewService(settings),
 			application.NewService(tracker),
+			application.NewService(app.NewShellService(shell)),
+			application.NewService(notifier),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
@@ -91,20 +99,19 @@ func main() {
 		Linux: application.LinuxOptions{
 			ApplicationID: "solutions.klein_it.KimaiTracker",
 			ProgramName:   "kimai-tracker",
+			// The app lives in the tray; closing the window must not quit it.
+			DisableQuitOnLastWindowClosed: true,
 		},
-		// A second launch brings the running instance to the front instead of
-		// starting another tracker.
+		// A second launch is forwarded to the running instance: it shows the
+		// window or runs --toggle / --timer (used for desktop shortcuts, e.g.
+		// on Wayland where apps cannot grab global keys).
 		SingleInstance: &application.SingleInstanceOptions{
-			UniqueID: "solutions.klein-it.kimai-tracker",
-			OnSecondInstanceLaunch: func(application.SecondInstanceData) {
-				if mainWindow != nil {
-					mainWindow.Show()
-					mainWindow.Focus()
-				}
-			},
+			UniqueID:               "solutions.klein-it.kimai-tracker",
+			OnSecondInstanceLaunch: func(d application.SecondInstanceData) { shell.HandleArgs(d.Args) },
 		},
 		Mac: application.MacOptions{
-			ApplicationShouldTerminateAfterLastWindowClosed: true,
+			// The app lives in the tray; closing the window must not quit it.
+			ApplicationShouldTerminateAfterLastWindowClosed: false,
 		},
 	})
 
@@ -119,6 +126,7 @@ func main() {
 		Frameless:       true,
 		BackgroundType:  application.BackgroundTypeTransparent,
 		InitialPosition: application.WindowCentered,
+		Hidden:          app.StartHidden(os.Args[1:]),
 		Mac: application.MacWindow{
 			Backdrop: application.MacBackdropTranslucent,
 			TitleBar: application.MacTitleBarHiddenInset,
@@ -135,6 +143,8 @@ func main() {
 	a.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
 		application.InvokeSync(desktop.MakeFramelessWindowsTransparent)
 	})
+	shell.Setup(a, mainWindow)
+	defer shell.Shutdown()
 
 	a.Event.OnApplicationEvent(events.Common.ThemeChanged, func(*application.ApplicationEvent) {
 		a.Event.Emit("theme:changed", a.Env.IsDarkMode())

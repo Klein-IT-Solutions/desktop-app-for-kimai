@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Events } from "@wailsio/runtime";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
   import TitleBar from "./lib/components/TitleBar.svelte";
@@ -7,6 +8,11 @@
 
   type View = "tracker" | "settings";
   let view = $state<View>("tracker");
+
+  // The tray menu can open the settings.
+  Events.On("navigate", (ev) => {
+    if (ev.data === "settings" || ev.data === "tracker") view = ev.data;
+  });
 
   const slide = (dir: 1 | -1) => ({ x: 40 * dir, duration: 260, easing: cubicOut, opacity: 0 });
 </script>

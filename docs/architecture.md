@@ -116,3 +116,30 @@ full start → update → stop flow against a real instance (`make kimai-up`).
   alphabetically.
 - The description of a running timer is PATCHed ~0.7 s after typing stops; without a
   running timer it is kept as draft for the next start.
+
+## Background operation
+
+- `Shell` (not bound) owns the tray icon, close-to-tray, the global hotkey,
+  notifications and command-line actions; `ShellService` exposes the settings to the UI.
+- Tray: Wails' StatusNotifierItem implementation. `desktop.TrayAvailable()` checks for
+  `org.kde.StatusNotifierWatcher`; without it, closing minimises instead of hiding, and
+  `--hidden` is ignored so the app never becomes unreachable. The menu shows the
+  running time at minute resolution (refreshed every 5 s while running).
+- Hotkey (`internal/hotkey`): X11 key grab via `jezek/xgb` (pure Go, also grabbed with
+  Caps/Num Lock variants); on Wayland the XDG GlobalShortcuts portal. Fallback for all
+  desktops: `kimai-tracker --toggle` / `--timer`, forwarded to the running instance via
+  Wails single-instance.
+- Notifications: Wails notifications service (freedesktop on Linux), sent on every
+  running/stopped transition, including timers stopped in the Kimai web UI.
+- Autostart: XDG autostart entry with `--hidden`; the AppImage path is used when running
+  from an AppImage.
+- A window created hidden is centred after it is first shown (GTK ignores positioning
+  before mapping; on Wayland the compositor places windows).
+
+Untested so far: the GlobalShortcuts portal flow on a real KDE/GNOME Wayland session
+(the container has no portal backend for it).
+
+## Branding
+
+Publisher details live in `frontend/src/lib/brand/brand.ts`. Drop the official logo at
+`frontend/src/lib/brand/logo.svg`; until then a text wordmark is shown.

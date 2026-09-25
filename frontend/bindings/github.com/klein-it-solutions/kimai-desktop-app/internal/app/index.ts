@@ -3,10 +3,12 @@
 
 import * as AppService from "./appservice.js";
 import * as SettingsService from "./settingsservice.js";
+import * as ShellService from "./shellservice.js";
 import * as TrackerService from "./trackerservice.js";
 export {
     AppService,
     SettingsService,
+    ShellService,
     TrackerService
 };
 
@@ -19,6 +21,7 @@ export type {
     Selection,
     Settings,
     SettingsInput,
+    ShellStatus,
     StartRequest,
     TrackerState
 } from "./models.js";

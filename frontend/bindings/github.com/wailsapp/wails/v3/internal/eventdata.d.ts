@@ -13,6 +13,8 @@ declare module "@wailsio/runtime" {
     namespace Events {
         interface CustomEvents {
             "connection:changed": app$0.ConnectionResult;
+            "navigate": string;
+            "shell:changed": app$0.ShellStatus;
             "theme:changed": boolean;
             "tracker:changed": app$0.TrackerState;
         }
