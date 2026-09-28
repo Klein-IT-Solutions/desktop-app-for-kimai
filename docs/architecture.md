@@ -141,5 +141,7 @@ Untested so far: the GlobalShortcuts portal flow on a real KDE/GNOME Wayland ses
 
 ## Branding
 
-Publisher details live in `frontend/src/lib/brand/brand.ts`. Drop the official logo at
-`frontend/src/lib/brand/logo.svg`; until then a text wordmark is shown.
+Publisher details live in `frontend/src/lib/brand/brand.ts`. Put the official logo
+next to it as `logo.svg`, `logo.webp` or `logo.png` (optionally `logo-dark.*` for dark
+mode; without it the logo sits on a light badge in dark mode). Until then a text
+wordmark is shown.

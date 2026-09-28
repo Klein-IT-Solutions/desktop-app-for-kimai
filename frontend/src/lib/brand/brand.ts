@@ -1,6 +1,7 @@
 /**
- * Publisher branding. Replace logo.svg with the official Klein IT Solutions
- * logo; until then BrandLogo renders a text wordmark.
+ * Publisher branding. Put the official logo next to this file as
+ * logo.svg / logo.png / logo.webp (optionally logo-dark.* for dark mode);
+ * without a logo file BrandLogo renders a text wordmark.
  */
 export const BRAND = {
   company: "Klein IT Solutions",
@@ -10,6 +11,20 @@ export const BRAND = {
   license: "https://github.com/klein-it-solutions/kimai-desktop-app/blob/main/LICENSE",
 };
 
-// Vite resolves this at build time; an absent file yields an empty record.
-const logos = import.meta.glob("./logo.svg", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
-export const brandLogoUrl: string | undefined = logos["./logo.svg"];
+// Vite resolves these at build time; missing files simply yield no entry.
+const files = import.meta.glob("./logo{,-dark}.{svg,png,webp}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
+function pick(base: string): string | undefined {
+  for (const ext of ["svg", "webp", "png"]) {
+    const url = files[`./${base}.${ext}`];
+    if (url) return url;
+  }
+  return undefined;
+}
+
+export const brandLogoUrl = pick("logo");
+export const brandLogoDarkUrl = pick("logo-dark");
