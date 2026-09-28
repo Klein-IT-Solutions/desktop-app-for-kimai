@@ -338,7 +338,7 @@
   <h2 class="mt-5 {heading}">Über</h2>
   <section class="rounded-[10px] bg-field px-3 py-3 text-center shadow-[inset_0_0_0_0.5px_var(--hairline)]">
     <button class="mx-auto block transition-opacity hover:opacity-80" title={BRAND.website} onclick={() => AppService.OpenURL(BRAND.website)}>
-      <BrandLogo height={24} />
+      <BrandLogo height={32} />
     </button>
     <p class="mt-2 text-[12px] text-fg-muted">
       Kimai Tracker {info?.version ?? ""} ist ein Open-Source-Projekt von {BRAND.company}.

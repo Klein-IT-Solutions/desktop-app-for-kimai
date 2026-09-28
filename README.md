@@ -3,7 +3,10 @@
 A minimalist, open-source desktop time tracker for [Kimai](https://www.kimai.org) –
 built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind CSS.
 
+<a href="https://klein-it.solutions"><img src="docs/brand/klein-it-solutions.png" alt="Klein IT Solutions" width="40" align="left"></a>
+
 Developed and maintained by **[Klein IT Solutions](https://klein-it.solutions)**.
+<br clear="left">
 
 > **Status:** early development (step 4 of 6 – tracking and background operation work).
 > Voice input and packaging are being added step by step, see [Roadmap](#roadmap).
