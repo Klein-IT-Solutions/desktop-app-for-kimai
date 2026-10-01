@@ -26,10 +26,20 @@ type Status struct {
 	Message string `json:"message,omitempty"`
 }
 
-// Manager owns the active shortcut registration.
+// Shortcut identifies a registered action.
+type Shortcut struct {
+	// ID is a stable identifier (used by the portal).
+	ID string
+	// Description is shown by the desktop when confirming the shortcut.
+	Description string
+}
+
+// Manager owns one shortcut registration.
 type Manager struct {
-	onPress  func()
-	onStatus func(Status)
+	shortcut  Shortcut
+	onPress   func()
+	onRelease func()
+	onStatus  func(Status)
 
 	mu     sync.Mutex
 	cancel context.CancelFunc
@@ -37,10 +47,12 @@ type Manager struct {
 	last   time.Time
 }
 
-// NewManager creates a manager. onPress runs on every activation (debounced),
-// onStatus whenever the registration status changes.
-func NewManager(onPress func(), onStatus func(Status)) *Manager {
-	return &Manager{onPress: onPress, onStatus: onStatus}
+// NewManager creates a manager. onPress runs on every activation; with a
+// nil onRelease presses are debounced (toggle shortcuts), otherwise onRelease
+// runs when the key is let go (push-to-talk). onStatus is called whenever the
+// registration status changes.
+func NewManager(sc Shortcut, onPress, onRelease func(), onStatus func(Status)) *Manager {
+	return &Manager{shortcut: sc, onPress: onPress, onRelease: onRelease, onStatus: onStatus}
 }
 
 // Status returns the current registration status.
@@ -64,7 +76,7 @@ func (m *Manager) Register(accelerator string) Status {
 	m.mu.Lock()
 	m.cancel = cancel
 	m.mu.Unlock()
-	return m.set(register(ctx, acc, m.press, func(s Status) {
+	return m.set(register(ctx, acc, m.shortcut, m.press, m.release, func(s Status) {
 		if ctx.Err() == nil {
 			m.set(s)
 		}
@@ -82,10 +94,10 @@ func (m *Manager) Stop() {
 	}
 }
 
-// press debounces key repeat and duplicate events.
+// press debounces key repeat and duplicate events for toggle shortcuts.
 func (m *Manager) press() {
 	m.mu.Lock()
-	if time.Since(m.last) < 300*time.Millisecond {
+	if m.onRelease == nil && time.Since(m.last) < 300*time.Millisecond {
 		m.mu.Unlock()
 		return
 	}
@@ -93,6 +105,12 @@ func (m *Manager) press() {
 	m.mu.Unlock()
 	if m.onPress != nil {
 		m.onPress()
+	}
+}
+
+func (m *Manager) release() {
+	if m.onRelease != nil {
+		m.onRelease()
 	}
 }
 

@@ -3,6 +3,7 @@ module github.com/klein-it-solutions/kimai-desktop-app
 go 1.25.0
 
 require (
+	github.com/gen2brain/malgo v0.11.26
 	github.com/godbus/dbus/v5 v5.2.2
 	github.com/jezek/xgb v1.3.1
 	github.com/wailsapp/wails/v3 v3.0.0-beta.28

@@ -80,7 +80,9 @@ type Shell struct {
 func NewShell(store *config.Store, tracker *TrackerService, notifier *notifications.NotificationService) *Shell {
 	s := &Shell{store: store, tracker: tracker, notifier: notifier}
 	s.hotkeys = hotkey.NewManager(
+		hotkey.Shortcut{ID: "toggle-window", Description: "Kimai Tracker ein-/ausblenden"},
 		func() { application.InvokeAsync(s.ToggleWindow) },
+		nil,
 		func(hotkey.Status) { s.emitStatus() },
 	)
 	return s

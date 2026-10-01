@@ -1,5 +1,6 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import MicButton from "./MicButton.svelte";
+  import { voice } from "../voice.svelte";
 
   let {
     value = "",
@@ -21,18 +22,15 @@
     {value}
     oninput={(e) => oninput(e.currentTarget.value)}
     rows="2"
-    placeholder="Woran arbeitest du?"
+    placeholder={voice.state === "recording" ? "Ich höre zu …" : "Woran arbeitest du?"}
     class="min-h-[38px] flex-1 resize-none bg-transparent py-1 text-[13px] leading-snug text-fg outline-none placeholder:text-fg-subtle"
   ></textarea>
-  <button
-    class="grid size-8 shrink-0 place-items-center rounded-lg text-fg-muted transition-colors enabled:hover:bg-field-hover enabled:hover:text-accent disabled:opacity-40"
-    aria-label="Spracheingabe"
-    title={micAvailable ? "Gedrückt halten zum Sprechen" : "Spracheingabe folgt in Schritt 5"}
-    disabled={!micAvailable}
-  >
-    <Icon name="mic" size={17} />
-  </button>
-  {#if status}
+  <MicButton enabled={micAvailable} />
+  {#if voice.state !== "idle"}
+    <span class="absolute right-12 bottom-1.5 text-[10px] {voice.state === 'recording' ? 'text-danger' : 'text-fg-subtle'}">
+      {voice.state === "recording" ? "Aufnahme …" : "Transkribiere …"}
+    </span>
+  {:else if status}
     <span
       class="absolute right-12 bottom-1.5 text-[10px] transition-opacity
         {status === 'error' ? 'text-danger' : status === 'saved' ? 'text-success' : 'text-fg-subtle'}"

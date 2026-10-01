@@ -17,6 +17,10 @@ declare module "@wailsio/runtime" {
             "shell:changed": app$0.ShellStatus;
             "theme:changed": boolean;
             "tracker:changed": app$0.TrackerState;
+            "voice:download": app$0.DownloadProgress;
+            "voice:level": number;
+            "voice:result": string;
+            "voice:state": app$0.VoiceState;
         }
     }
 }

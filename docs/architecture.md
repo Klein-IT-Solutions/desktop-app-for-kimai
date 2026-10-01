@@ -145,3 +145,25 @@ Publisher details live in `frontend/src/lib/brand/brand.ts`. Put the official lo
 next to it as `logo.svg`, `logo.webp` or `logo.png` (optionally `logo-dark.*` for dark
 mode; without it the logo sits on a light badge in dark mode). Until then a text
 wordmark is shown.
+
+## Voice input
+
+- Recording in Go with `gen2brain/malgo` (miniaudio, vendored C, no system libraries;
+  PipeWire/PulseAudio/ALSA on Linux, CoreAudio, WASAPI) at 16 kHz mono – the format
+  Whisper expects. Max. 2 minutes per recording. `Recorder.Stop` waits until the samples
+  cover the recorded time (≤ 3 s), because some sound servers deliver capture data late;
+  otherwise the end of a sentence would be cut off.
+- `voice.Local` runs `whisper-cli -m MODEL -f FILE -l LANG -t N -nt -np` and strips
+  markers such as `[BLANK_AUDIO]`. `voice.API` posts multipart form data to
+  `{url}/audio/transcriptions` (`model`, `language`, `response_format=json`).
+- Models (quantised, multilingual) are downloaded from the whisper.cpp Hugging Face
+  repository to `~/.local/share/kimai-tracker/models`, written to a temp file and only
+  accepted if complete and starting with the ggml magic bytes.
+- Push-to-talk uses the hotkey manager with press/release callbacks: X11 key release with
+  auto-repeat filtering; on Wayland the portal's `Activated`/`Deactivated` signals.
+- The frontend appends `voice:result` text to the description, which then goes through the
+  normal debounced description save.
+
+Tested in the container with a PulseAudio null sink (speech synthesised with espeak-ng),
+a fake OpenAI-compatible server and whisper.cpp built from source with its test model.
+Real transcription quality could not be tested there (model downloads are blocked).

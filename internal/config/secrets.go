@@ -17,6 +17,8 @@ const KeyringService = "kimai-tracker"
 // Secret identifiers.
 const (
 	SecretKimaiToken = "kimai-api-token"
+	// SecretTranscriptionKey is the key for the OpenAI-compatible transcription API.
+	SecretTranscriptionKey = "transcription-api-key"
 )
 
 // ErrSecretNotFound is returned when no secret is stored under a key.

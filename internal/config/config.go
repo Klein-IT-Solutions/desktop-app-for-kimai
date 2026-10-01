@@ -27,7 +27,30 @@ type Config struct {
 	Hotkey string `json:"hotkey"`
 	// Notifications enables desktop notifications on start/stop.
 	Notifications bool `json:"notifications"`
+	// Voice configures speech input.
+	Voice VoiceConfig `json:"voice"`
 }
+
+// Transcription engines.
+const (
+	EngineOff   = ""
+	EngineLocal = "local" // whisper.cpp
+	EngineAPI   = "api"   // OpenAI-compatible API
+)
+
+// VoiceConfig configures recording and transcription.
+type VoiceConfig struct {
+	Engine        string `json:"engine"`
+	WhisperBinary string `json:"whisperBinary,omitempty"`
+	WhisperModel  string `json:"whisperModel,omitempty"`
+	APIURL        string `json:"apiUrl,omitempty"`
+	APIModel      string `json:"apiModel,omitempty"`
+	// PushToTalk is the global hold-to-talk shortcut ("" disables it).
+	PushToTalk string `json:"pushToTalk"`
+}
+
+// DefaultPushToTalk is held down while speaking.
+const DefaultPushToTalk = "Super+Shift+V"
 
 // DefaultHotkey toggles the window.
 const DefaultHotkey = "Super+Shift+T"
@@ -40,7 +63,12 @@ const (
 
 // Default returns the configuration used when no file exists yet.
 func Default() Config {
-	return Config{Language: "de", Hotkey: DefaultHotkey, Notifications: true}
+	return Config{
+		Language:      "de",
+		Hotkey:        DefaultHotkey,
+		Notifications: true,
+		Voice:         VoiceConfig{APIURL: "https://api.openai.com/v1", APIModel: "whisper-1", PushToTalk: DefaultPushToTalk},
+	}
 }
 
 // Store reads and writes the configuration file. It is safe for concurrent use.

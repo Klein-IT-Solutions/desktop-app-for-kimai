@@ -8,8 +8,8 @@ built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind 
 Developed and maintained by **[Klein IT Solutions](https://klein-it.solutions)**.
 <br clear="left">
 
-> **Status:** early development (step 4 of 6 – tracking and background operation work).
-> Voice input and packaging are being added step by step, see [Roadmap](#roadmap).
+> **Status:** early development (step 5 of 6 – tracking, background operation and voice
+> input work). Packaging follows next, see [Roadmap](#roadmap).
 
 | Light | Dark |
 | ----- | ---- |
@@ -35,7 +35,8 @@ Developed and maintained by **[Klein IT Solutions](https://klein-it.solutions)**
   the window hides it to the tray
 - Global hotkey to show/hide the window (default `Super+Shift+T`, configurable)
 - Desktop notifications on start/stop, optional start at login
-- Voice input for the description via local whisper.cpp or an OpenAI-compatible API *(step 5)*
+- Voice input for the description: hold the mic button (or a global push-to-talk key) and
+  speak; transcribed locally with whisper.cpp or via an OpenAI-compatible API
 - API token stored in the system keyring, never in plain text
 - Connection test with clear messages for wrong URL, invalid token (401), missing
   permissions (403), offline server and untrusted TLS certificates
@@ -185,6 +186,34 @@ KDE: *System Settings → Shortcuts → Add New → Command or Script*.
 **Start at login** creates `~/.config/autostart/kimai-tracker.desktop`; the app then
 starts hidden in the tray (`--hidden`).
 
+## Voice input
+
+Hold the microphone button next to the description and speak – or click once to start and
+again to stop (Esc cancels). The recognised text is appended to the description and stays
+editable; with a running timer it is saved to Kimai automatically. The global
+**push-to-talk** key (default `Super+Shift+V`) works even while the window is hidden.
+
+Choose the transcription in *Settings → Speech input*:
+
+| Option | Notes |
+| ------ | ----- |
+| **Local (whisper.cpp)** | Fully offline. The app downloads a model for you (Base 57 MB, Small 181 MB – recommended for German, Medium 514 MB). Needs whisper.cpp's `whisper-cli`; the app finds it in `PATH`, `/usr/local/bin`, Homebrew or `~/.local/share/kimai-tracker/bin`. |
+| **API** | Any OpenAI-compatible `/audio/transcriptions` endpoint: OpenAI (`whisper-1`, `gpt-4o-mini-transcribe`), Groq (`whisper-large-v3`), a self-hosted faster-whisper server, … The key is stored in the system keyring. The recording is sent to that service. |
+
+The language follows *Settings → General → Language* (default German).
+
+**Installing whisper.cpp** (until it ships with the packages):
+
+```bash
+git clone https://github.com/ggml-org/whisper.cpp && cd whisper.cpp
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+cmake --build build -j --target whisper-cli
+mkdir -p ~/.local/share/kimai-tracker/bin && cp build/bin/whisper-cli ~/.local/share/kimai-tracker/bin/
+```
+
+Or `brew install whisper-cpp` where Homebrew is available. Behind a firewall that blocks
+Hugging Face, set `KIMAI_TRACKER_MODEL_URL` to a mirror that serves the `ggml-*.bin` files.
+
 ## Project structure
 
 ```
@@ -196,7 +225,7 @@ starts hidden in the tray (`--hidden`).
 │   ├── desktop/            # Window controls, transparency, tray check, autostart
 │   ├── hotkey/             # Global shortcut (X11 grab, Wayland portal)
 │   ├── kimai/              # Kimai REST client with tests
-│   └── voice/              # Recording & transcription      (step 5)
+│   └── voice/              # Recording (miniaudio), whisper.cpp, OpenAI API, model download
 ├── frontend/               # Svelte + TypeScript + Tailwind UI
 │   ├── bindings/           # Generated TypeScript bindings for Go services
 │   └── src/
@@ -216,7 +245,7 @@ See [docs/architecture.md](docs/architecture.md) for technical decisions.
 2. ✅ Settings + Kimai client including connection test
 3. ✅ Customer/project/activity flow and start/stop
 4. ✅ Tray, global hotkey, background operation
-5. ⏳ Voice input
+5. ✅ Voice input
 6. ⏳ Packaging (.deb, AppImage) and CI; later macOS/Windows
 
 ## License

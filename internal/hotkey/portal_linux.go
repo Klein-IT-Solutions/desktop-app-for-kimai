@@ -14,7 +14,6 @@ const (
 	portalPath  = "/org/freedesktop/portal/desktop"
 	shortcutsIf = "org.freedesktop.portal.GlobalShortcuts"
 	requestIf   = "org.freedesktop.portal.Request"
-	shortcutID  = "toggle-window"
 )
 
 type portalShortcut struct {
@@ -25,7 +24,7 @@ type portalShortcut struct {
 // listenPortal binds the shortcut through the XDG GlobalShortcuts portal. ok
 // is false when the portal is not available at all. Binding may need user
 // confirmation; the result arrives via onStatus.
-func listenPortal(ctx context.Context, acc Accelerator, onPress func(), onStatus func(Status)) (Status, bool) {
+func listenPortal(ctx context.Context, acc Accelerator, sc Shortcut, onPress, onRelease func(), onStatus func(Status)) (Status, bool) {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
 		return Status{}, false
@@ -46,9 +45,11 @@ func listenPortal(ctx context.Context, acc Accelerator, onPress func(), onStatus
 		conn.Close()
 		return Status{}, false
 	}
-	if err := conn.AddMatchSignal(dbus.WithMatchInterface(shortcutsIf), dbus.WithMatchMember("Activated")); err != nil {
-		conn.Close()
-		return Status{}, false
+	for _, member := range []string{"Activated", "Deactivated"} {
+		if err := conn.AddMatchSignal(dbus.WithMatchInterface(shortcutsIf), dbus.WithMatchMember(member)); err != nil {
+			conn.Close()
+			return Status{}, false
+		}
 	}
 
 	base := Status{Backend: BackendPortal, Shortcut: acc.String()}
@@ -61,7 +62,7 @@ func listenPortal(ctx context.Context, acc Accelerator, onPress func(), onStatus
 			onStatus(s)
 			return
 		}
-		trigger, err := bindShortcut(ctx, conn, portal, session, acc, signals)
+		trigger, err := bindShortcut(ctx, conn, portal, session, acc, sc, signals)
 		if err != nil {
 			s := base
 			s.Message = "Tastenkürzel nicht bestätigt: " + err.Error() + " " + fallbackHint
@@ -82,11 +83,20 @@ func listenPortal(ctx context.Context, acc Accelerator, onPress func(), onStatus
 				if !ok {
 					return
 				}
-				if sig.Name == shortcutsIf+".Activated" && len(sig.Body) >= 2 {
-					if p, _ := sig.Body[0].(dbus.ObjectPath); p == session {
-						if id, _ := sig.Body[1].(string); id == shortcutID {
-							onPress()
-						}
+				if len(sig.Body) < 2 {
+					continue
+				}
+				p, _ := sig.Body[0].(dbus.ObjectPath)
+				id, _ := sig.Body[1].(string)
+				if p != session || id != sc.ID {
+					continue
+				}
+				switch sig.Name {
+				case shortcutsIf + ".Activated":
+					onPress()
+				case shortcutsIf + ".Deactivated":
+					if onRelease != nil {
+						onRelease()
 					}
 				}
 			}
@@ -151,12 +161,12 @@ func createSession(ctx context.Context, conn *dbus.Conn, portal dbus.BusObject, 
 	return "", fmt.Errorf("keine Sitzung erhalten")
 }
 
-func bindShortcut(ctx context.Context, conn *dbus.Conn, portal dbus.BusObject, session dbus.ObjectPath, acc Accelerator, signals chan *dbus.Signal) (string, error) {
+func bindShortcut(ctx context.Context, conn *dbus.Conn, portal dbus.BusObject, session dbus.ObjectPath, acc Accelerator, sc Shortcut, signals chan *dbus.Signal) (string, error) {
 	tok := token()
 	shortcuts := []portalShortcut{{
-		ID: shortcutID,
+		ID: sc.ID,
 		Options: map[string]dbus.Variant{
-			"description":       dbus.MakeVariant("Kimai Tracker ein-/ausblenden"),
+			"description":       dbus.MakeVariant(sc.Description),
 			"preferred_trigger": dbus.MakeVariant(acc.PortalTrigger()),
 		},
 	}}

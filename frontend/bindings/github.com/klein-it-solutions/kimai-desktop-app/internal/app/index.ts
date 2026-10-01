@@ -5,16 +5,20 @@ import * as AppService from "./appservice.js";
 import * as SettingsService from "./settingsservice.js";
 import * as ShellService from "./shellservice.js";
 import * as TrackerService from "./trackerservice.js";
+import * as VoiceService from "./voiceservice.js";
 export {
     AppService,
     SettingsService,
     ShellService,
-    TrackerService
+    TrackerService,
+    VoiceService
 };
 
 export type {
     ConnectionResult,
+    DownloadProgress,
     Info,
+    ModelStatus,
     Option,
     OptionList,
     SaveResult,
@@ -23,5 +27,8 @@ export type {
     SettingsInput,
     ShellStatus,
     StartRequest,
-    TrackerState
+    TrackerState,
+    VoiceSettings,
+    VoiceSettingsInput,
+    VoiceState
 } from "./models.js";

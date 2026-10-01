@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync"
+	"time"
 
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
@@ -25,9 +27,10 @@ func x11ErrorMessage(err error) string {
 	return fmt.Sprintf("Tastenkürzel konnte nicht registriert werden (%v).", err)
 }
 
-// listenX11 grabs the key on the root window and calls onPress for every
-// key press until ctx is cancelled.
-func listenX11(ctx context.Context, acc Accelerator, onPress func()) error {
+// listenX11 grabs the key on the root window and calls onPress/onRelease
+// until ctx is cancelled. Auto-repeat (a release immediately followed by a
+// press) is filtered out, so a held key yields one press and one release.
+func listenX11(ctx context.Context, acc Accelerator, onPress, onRelease func()) error {
 	conn, err := xgb.NewConn()
 	if err != nil {
 		return err
@@ -80,13 +83,48 @@ func listenX11(ctx context.Context, acc Accelerator, onPress func()) error {
 		conn.Close()
 	}()
 	go func() {
+		var (
+			down         bool
+			releaseTimer *time.Timer
+			mu           sync.Mutex
+		)
 		for {
 			ev, err := conn.WaitForEvent()
 			if ev == nil && err == nil {
 				return // connection closed
 			}
-			if kp, ok := ev.(xproto.KeyPressEvent); ok && kp.Detail == keycode {
-				onPress()
+			switch e := ev.(type) {
+			case xproto.KeyPressEvent:
+				if e.Detail != keycode {
+					continue
+				}
+				mu.Lock()
+				repeat := releaseTimer != nil && releaseTimer.Stop()
+				releaseTimer = nil
+				wasDown := down
+				down = true
+				mu.Unlock()
+				if !repeat && !wasDown {
+					onPress()
+				}
+			case xproto.KeyReleaseEvent:
+				if e.Detail != keycode || onRelease == nil {
+					mu.Lock()
+					if e.Detail == keycode {
+						down = false
+					}
+					mu.Unlock()
+					continue
+				}
+				mu.Lock()
+				releaseTimer = time.AfterFunc(40*time.Millisecond, func() {
+					mu.Lock()
+					down = false
+					releaseTimer = nil
+					mu.Unlock()
+					onRelease()
+				})
+				mu.Unlock()
 			}
 		}
 	}()

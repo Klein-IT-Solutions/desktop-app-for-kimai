@@ -7,6 +7,8 @@
   import DescriptionField from "../components/DescriptionField.svelte";
   import Picker from "../components/Picker.svelte";
   import { connection } from "../connection.svelte";
+  import { voice } from "../voice.svelte";
+  import { voiceEnabled } from "../voiceSettings.svelte";
   import {
     canStart,
     selectActivity,
@@ -162,10 +164,22 @@
     </button>
   {/if}
 
+  {#if voice.error}
+    <button
+      transition:slide={{ duration: 180 }}
+      class="mb-2 rounded-[10px] bg-warning/15 px-3 py-2 text-left text-[12px] leading-snug"
+      title="Ausblenden"
+      onclick={() => (voice.error = "")}
+    >
+      {voice.error}
+    </button>
+  {/if}
+
   <DescriptionField
     value={s.description}
     oninput={setDescription}
     status={s.running ? tracker.descriptionStatus : ""}
+    micAvailable={voiceEnabled.value}
   />
 
   <button

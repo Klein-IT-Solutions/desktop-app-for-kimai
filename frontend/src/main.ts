@@ -7,11 +7,15 @@ import { initConnection } from "./lib/connection.svelte";
 import { initPlatform } from "./lib/platform";
 import { initTracker } from "./lib/tracker.svelte";
 import { initShell } from "./lib/shell.svelte";
+import { initVoice } from "./lib/voice.svelte";
+import { initVoiceSettings } from "./lib/voiceSettings.svelte";
 
 initTheme();
 initConnection();
 initTracker();
 initShell();
+initVoice();
+initVoiceSettings();
 
 initPlatform().finally(() => {
   mount(App, { target: document.getElementById("app")! });

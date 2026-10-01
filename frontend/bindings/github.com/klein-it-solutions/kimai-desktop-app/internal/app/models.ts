@@ -22,6 +22,17 @@ export interface ConnectionResult {
 }
 
 /**
+ * DownloadProgress reports a running model download.
+ */
+export interface DownloadProgress {
+    "id": string;
+    "done": number;
+    "total": number;
+    "finished": boolean;
+    "error"?: string;
+}
+
+/**
  * Info describes the running application and its environment.
  */
 export interface Info {
@@ -38,6 +49,19 @@ export interface Info {
      * WindowControls tells the frontend how to render the title bar buttons.
      */
     "windowControls": desktop$0.WindowControls;
+}
+
+/**
+ * ModelStatus is a downloadable model and whether it is installed.
+ */
+export interface ModelStatus {
+    "id": string;
+    "name": string;
+    "description": string;
+    "file": string;
+    "sizeMb": number;
+    "installed": boolean;
+    "path": string;
 }
 
 /**
@@ -180,4 +204,47 @@ export interface TrackerState {
     "project": Selection;
     "activity": Selection;
     "description": string;
+}
+
+/**
+ * VoiceSettings is the speech settings view model (the API key is never sent).
+ */
+export interface VoiceSettings {
+    "engine": string;
+    "whisperBinary": string;
+    "whisperModel": string;
+    "apiUrl": string;
+    "apiModel": string;
+    "hasApiKey": boolean;
+    "pushToTalk": hotkey$0.Status;
+    "language": string;
+}
+
+/**
+ * VoiceSettingsInput carries changed speech settings.
+ */
+export interface VoiceSettingsInput {
+    "engine": string;
+    "whisperBinary": string;
+    "whisperModel": string;
+    "apiUrl": string;
+    "apiModel": string;
+
+    /**
+     * APIKey replaces the stored key; empty keeps it.
+     */
+    "apiKey": string;
+    "pushToTalk": string;
+}
+
+/**
+ * VoiceState is the current speech-input state.
+ */
+export interface VoiceState {
+    "state": string;
+
+    /**
+     * Error is set when the last recording or transcription failed.
+     */
+    "error"?: string;
 }

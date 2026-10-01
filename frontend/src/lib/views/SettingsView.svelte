@@ -15,6 +15,7 @@
   import { ShellService } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
   import { shell } from "../shell.svelte";
   import BrandLogo from "../brand/BrandLogo.svelte";
+  import VoiceSettingsSection from "../components/VoiceSettingsSection.svelte";
   import { BRAND } from "../brand/brand";
   import { connection, errorMessage, refreshConnection } from "../connection.svelte";
 
@@ -263,6 +264,9 @@
     </label>
   </section>
   <p class="mt-1.5 px-1 text-[11px] text-fg-muted">Wird für die Spracheingabe verwendet.</p>
+
+  <h2 class="mt-5 {heading}">Spracheingabe</h2>
+  <VoiceSettingsSection />
 
   <h2 class="mt-5 {heading}">Hintergrund</h2>
   <section class={group}>
