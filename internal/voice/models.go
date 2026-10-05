@@ -1,16 +1,15 @@
 package voice
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+
+	"github.com/klein-it-solutions/kimai-desktop-app/internal/fetch"
 )
 
 // ModelBaseURL hosts the official whisper.cpp ggml models.
@@ -71,84 +70,13 @@ func ModelPath(m Model) (string, error) {
 	return filepath.Join(dir, "models", m.File), nil
 }
 
-// ggmlMagic starts every ggml model file ("ggml" as little-endian uint32).
-var ggmlMagic = []byte{0x6c, 0x6d, 0x67, 0x67}
-
-// Download fetches url into dest, reporting progress. The file is written to
-// a temporary name and only renamed once complete and recognised as a ggml
-// model, so an interrupted download never leaves a broken model behind.
+// Download fetches a whisper.cpp model (see fetch.File).
 func Download(ctx context.Context, client *http.Client, url, dest string, progress func(done, total int64)) error {
-	if client == nil {
-		client = &http.Client{}
-	}
-	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
-		return err
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("User-Agent", "kimai-tracker")
-	resp, err := client.Do(req)
-	if err != nil {
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-		return fmt.Errorf("Download fehlgeschlagen: %v", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Download fehlgeschlagen: HTTP %d", resp.StatusCode)
-	}
-
-	tmp, err := os.CreateTemp(filepath.Dir(dest), ".download-*")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(tmp.Name())
-
-	total := resp.ContentLength
-	var done int64
-	var head []byte
-	buf := make([]byte, 256<<10)
-	lastReport := int64(-1)
-	for {
-		n, rerr := resp.Body.Read(buf)
-		if n > 0 {
-			if len(head) < len(ggmlMagic) {
-				head = append(head, buf[:min(n, len(ggmlMagic)-len(head))]...)
-			}
-			if _, err := tmp.Write(buf[:n]); err != nil {
-				tmp.Close()
-				return err
-			}
-			done += int64(n)
-			if progress != nil && (done-lastReport >= 1<<20 || done == total) {
-				progress(done, total)
-				lastReport = done
-			}
-		}
-		if errors.Is(rerr, io.EOF) {
-			break
-		}
-		if rerr != nil {
-			tmp.Close()
-			if ctx.Err() != nil {
-				return ctx.Err()
-			}
-			return fmt.Errorf("Download abgebrochen: %v", rerr)
-		}
-	}
-	if err := tmp.Close(); err != nil {
-		return err
-	}
-	if total > 0 && done != total {
-		return fmt.Errorf("Download unvollständig (%d von %d Bytes)", done, total)
-	}
-	if !bytes.Equal(head, ggmlMagic) {
+	err := fetch.File(ctx, client, url, dest, fetch.MagicGGML, progress)
+	if errors.Is(err, fetch.ErrWrongType) {
 		return errors.New("Die heruntergeladene Datei ist kein whisper.cpp-Modell")
 	}
-	return os.Rename(tmp.Name(), dest)
+	return err
 }
 
 // binaryNames are the names whisper.cpp's CLI is installed under

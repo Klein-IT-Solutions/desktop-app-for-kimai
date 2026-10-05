@@ -16,6 +16,7 @@
   import { shell } from "../shell.svelte";
   import BrandLogo from "../brand/BrandLogo.svelte";
   import VoiceSettingsSection from "../components/VoiceSettingsSection.svelte";
+  import AssistantSettingsSection from "../components/AssistantSettingsSection.svelte";
   import { BRAND } from "../brand/brand";
   import { connection, errorMessage, refreshConnection } from "../connection.svelte";
 
@@ -267,6 +268,9 @@
 
   <h2 class="mt-5 {heading}">Spracheingabe</h2>
   <VoiceSettingsSection />
+
+  <h2 class="mt-5 {heading}">Stichpunkte (lokale KI)</h2>
+  <AssistantSettingsSection />
 
   <h2 class="mt-5 {heading}">Hintergrund</h2>
   <section class={group}>

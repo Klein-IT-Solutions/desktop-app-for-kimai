@@ -12,6 +12,7 @@ import type * as app$0 from "../../../../klein-it-solutions/kimai-desktop-app/in
 declare module "@wailsio/runtime" {
     namespace Events {
         interface CustomEvents {
+            "assistant:download": app$0.AssistantDownload;
             "connection:changed": app$0.ConnectionResult;
             "navigate": string;
             "shell:changed": app$0.ShellStatus;

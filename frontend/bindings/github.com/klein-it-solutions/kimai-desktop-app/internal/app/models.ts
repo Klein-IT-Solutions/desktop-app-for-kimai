@@ -9,6 +9,62 @@ import * as desktop$0 from "../desktop/models.js";
 import * as hotkey$0 from "../hotkey/models.js";
 
 /**
+ * AssistantDownload reports a running download.
+ */
+export interface AssistantDownload {
+    /**
+     * "model" or "runtime"
+     */
+    "kind": string;
+    "id": string;
+    "done": number;
+    "total": number;
+    "finished": boolean;
+    "error"?: string;
+}
+
+/**
+ * AssistantModel is a downloadable model and whether it is installed.
+ */
+export interface AssistantModel {
+    "id": string;
+    "name": string;
+    "description": string;
+    "url": string;
+    "file": string;
+    "sizeMb": number;
+    "license": string;
+    "installed": boolean;
+    "path": string;
+}
+
+/**
+ * AssistantSettings is the view model for the local AI settings.
+ */
+export interface AssistantSettings {
+    "enabled": boolean;
+    "autoDictation": boolean;
+    "model": string;
+    "server": string;
+    "models": AssistantModel[] | null;
+
+    /**
+     * Ready is set when runtime and model are available.
+     */
+    "ready": boolean;
+}
+
+/**
+ * AssistantSettingsInput carries changed settings.
+ */
+export interface AssistantSettingsInput {
+    "enabled": boolean;
+    "autoDictation": boolean;
+    "model": string;
+    "server": string;
+}
+
+/**
  * ConnectionResult describes the outcome of a connection check.
  */
 export interface ConnectionResult {

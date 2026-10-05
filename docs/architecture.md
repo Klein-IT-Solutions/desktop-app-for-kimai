@@ -167,3 +167,25 @@ wordmark is shown.
 Tested in the container with a PulseAudio null sink (speech synthesised with espeak-ng),
 a fake OpenAI-compatible server and whisper.cpp built from source with its test model.
 Real transcription quality could not be tested there (model downloads are blocked).
+
+## Local AI (bullet points)
+
+- `internal/llm` downloads llama.cpp's official CPU release build for the platform
+  (`llama-<tag>-bin-ubuntu-x64.tar.gz` etc., names taken from llama.cpp's
+  `release.yml`; built with `RPATH=$ORIGIN`, so it runs unpacked). The newest tag is
+  resolved via the redirect of `/releases/latest` (no API, no rate limit), falling back to
+  a pinned tag. Archives are extracted with path clamping and only relative symlinks.
+- `llm.Server` starts `llama-server -m MODEL --host 127.0.0.1 --port FREE -c 4096 -np 1`
+  on demand, waits for `/health`, uses the OpenAI-compatible `/v1/chat/completions` (the
+  server applies the model's chat template) and stops after 5 minutes idle. On Linux the
+  child gets `Pdeathsig`, so it never outlives the app.
+- A strict German system prompt asks for 1–5 bullets without invention;
+  `ParseBullets` normalises answers (drops introductions, unifies markers, max. 6).
+- Models are GGUF files (Qwen2.5 0.5B/1.5B Instruct, Apache-2.0; Llama 3.2 3B Instruct,
+  Llama 3.2 Community License), validated by the `GGUF` magic.
+
+Tested in the container with llama.cpp built from source and packed like a release, served
+from a local mirror, and a tiny random-weight qwen2 GGUF (real Qwen tokenizer) – this
+exercises download, unpacking, server start, chat template and parsing, but not the quality
+of real models (Hugging Face is blocked there). The Hugging Face file names of the models
+could not be verified from the container either.

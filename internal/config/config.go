@@ -29,6 +29,17 @@ type Config struct {
 	Notifications bool `json:"notifications"`
 	// Voice configures speech input.
 	Voice VoiceConfig `json:"voice"`
+	// Assistant configures the local language model for bullet points.
+	Assistant AssistantConfig `json:"assistant"`
+}
+
+// AssistantConfig configures the local LLM (llama.cpp).
+type AssistantConfig struct {
+	Enabled bool   `json:"enabled"`
+	Model   string `json:"model,omitempty"`  // path to a GGUF file
+	Server  string `json:"server,omitempty"` // path to llama-server
+	// AutoDictation turns dictated text into bullet points automatically.
+	AutoDictation bool `json:"autoDictation"`
 }
 
 // Transcription engines.

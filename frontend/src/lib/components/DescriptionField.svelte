@@ -1,6 +1,8 @@
 <script lang="ts">
   import MicButton from "./MicButton.svelte";
   import { voice } from "../voice.svelte";
+  import Icon from "./Icon.svelte";
+  import { assistant, assistantReady, summarizeDescription } from "../assistant.svelte";
 
   let {
     value = "",
@@ -21,12 +23,32 @@
   <textarea
     {value}
     oninput={(e) => oninput(e.currentTarget.value)}
-    rows="2"
+    rows={value.includes("\n") ? 4 : 2}
     placeholder={voice.state === "recording" ? "Ich höre zu …" : "Woran arbeitest du?"}
     class="min-h-[38px] flex-1 resize-none bg-transparent py-1 text-[13px] leading-snug text-fg outline-none placeholder:text-fg-subtle"
   ></textarea>
-  <MicButton enabled={micAvailable} />
-  {#if voice.state !== "idle"}
+  <div class="flex shrink-0 flex-col items-center gap-0.5">
+    <MicButton enabled={micAvailable} />
+    {#if assistantReady()}
+      <button
+        class="grid size-8 place-items-center rounded-lg transition-colors disabled:opacity-40
+          {assistant.busy ? 'text-accent' : 'text-fg-muted hover:bg-field-hover hover:text-accent'}"
+        title="In Stichpunkte umwandeln (lokale KI)"
+        aria-label="In Stichpunkte umwandeln"
+        disabled={assistant.busy || !value.trim()}
+        onclick={summarizeDescription}
+      >
+        {#if assistant.busy}
+          <span class="size-4 animate-spin rounded-full border-2 border-current border-r-transparent"></span>
+        {:else}
+          <Icon name="sparkles" size={16} />
+        {/if}
+      </button>
+    {/if}
+  </div>
+  {#if assistant.busy}
+    <span class="absolute right-12 bottom-1.5 text-[10px] text-accent">Formuliere Stichpunkte …</span>
+  {:else if voice.state !== "idle"}
     <span class="absolute right-12 bottom-1.5 text-[10px] {voice.state === 'recording' ? 'text-danger' : 'text-fg-subtle'}">
       {voice.state === "recording" ? "Aufnahme …" : "Transkribiere …"}
     </span>

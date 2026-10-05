@@ -37,6 +37,8 @@ Developed and maintained by **[Klein IT Solutions](https://klein-it.solutions)**
 - Desktop notifications on start/stop, optional start at login
 - Voice input for the description: hold the mic button (or a global push-to-talk key) and
   speak; transcribed locally with whisper.cpp or via an OpenAI-compatible API
+- Optional local AI turns notes and dictations into short bullet points – fully offline,
+  model and runtime are downloaded by the app
 - API token stored in the system keyring, never in plain text
 - Connection test with clear messages for wrong URL, invalid token (401), missing
   permissions (403), offline server and untrusted TLS certificates
@@ -214,6 +216,27 @@ mkdir -p ~/.local/share/kimai-tracker/bin && cp build/bin/whisper-cli ~/.local/s
 Or `brew install whisper-cpp` where Homebrew is available. Behind a firewall that blocks
 Hugging Face, set `KIMAI_TRACKER_MODEL_URL` to a mirror that serves the `ggml-*.bin` files.
 
+## Bullet points with a local AI
+
+*Settings → Bullet points (local AI)* turns descriptions into short bullet points with a
+small language model that runs entirely on your computer:
+
+1. Switch it on, click **Load** next to *llama.cpp* (≈ 30 MB, official release build for
+   your platform) and next to a model.
+2. Use the ✨ button next to the microphone – the result can be undone. Optionally,
+   dictations are converted automatically.
+
+| Model | Download | Notes |
+| ----- | -------- | ----- |
+| Qwen2.5 0.5B Instruct | ≈ 0.5 GB | very fast, simple bullets |
+| Qwen2.5 1.5B Instruct | ≈ 1.1 GB | recommended: good German, a few seconds on a laptop CPU |
+| Llama 3.2 3B Instruct | ≈ 2.0 GB | best wording, needs ≈ 3 GB RAM |
+
+The model is only loaded when needed (`llama-server` on 127.0.0.1) and unloaded after five
+minutes without use. An existing `llama-server` in `PATH` is used as well. Mirrors for
+restricted networks: `KIMAI_TRACKER_LLAMA_URL` (llama.cpp releases) and
+`KIMAI_TRACKER_LLM_MODEL_URL` (GGUF files).
+
 ## Project structure
 
 ```
@@ -225,7 +248,9 @@ Hugging Face, set `KIMAI_TRACKER_MODEL_URL` to a mirror that serves the `ggml-*.
 │   ├── desktop/            # Window controls, transparency, tray check, autostart
 │   ├── hotkey/             # Global shortcut (X11 grab, Wayland portal)
 │   ├── kimai/              # Kimai REST client with tests
-│   └── voice/              # Recording (miniaudio), whisper.cpp, OpenAI API, model download
+│   ├── voice/              # Recording (miniaudio), whisper.cpp, OpenAI API, model download
+│   ├── llm/                # Local LLM: llama.cpp runtime install, llama-server, bullet points
+│   └── fetch/              # Safe downloads (temp file, progress, type check)
 ├── frontend/               # Svelte + TypeScript + Tailwind UI
 │   ├── bindings/           # Generated TypeScript bindings for Go services
 │   └── src/

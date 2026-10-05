@@ -4,6 +4,7 @@ import {
   type VoiceState,
 } from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
 import { setDescription, tracker } from "./tracker.svelte";
+import { bulletsForDictation } from "./assistant.svelte";
 
 /** Speech input state shared by the mic button and the settings. */
 export const voice = $state({
@@ -19,11 +20,13 @@ export function initVoice() {
   Events.On("voice:state", (ev) => apply(ev.data as VoiceState));
   Events.On("voice:level", (ev) => (voice.level = Number(ev.data) || 0));
   // Recognised text is appended to the description and stays editable.
-  Events.On("voice:result", (ev) => {
-    const text = String(ev.data ?? "").trim();
+  Events.On("voice:result", async (ev) => {
+    let text = String(ev.data ?? "").trim();
     if (!text) return;
+    text = await bulletsForDictation(text);
     const current = tracker.state.description.trimEnd();
-    setDescription(current ? `${current} ${text}` : text);
+    const sep = text.startsWith("- ") || current.includes("\n- ") || current.startsWith("- ") ? "\n" : " ";
+    setDescription(current ? `${current}${sep}${text}` : text);
   });
 }
 

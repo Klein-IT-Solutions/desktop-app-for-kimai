@@ -34,6 +34,7 @@ func init() {
 	application.RegisterEvent[float64](app.EventVoiceLevel)
 	application.RegisterEvent[string](app.EventVoiceResult)
 	application.RegisterEvent[app.DownloadProgress](app.EventVoiceDownload)
+	application.RegisterEvent[app.AssistantDownload](app.EventAssistantDownload)
 }
 
 // openConfig loads the configuration. A corrupt file is moved aside so the
@@ -96,6 +97,7 @@ func main() {
 			application.NewService(tracker),
 			application.NewService(app.NewShellService(shell)),
 			application.NewService(app.NewVoiceService(store, conn, shell)),
+			application.NewService(app.NewAssistantService(store)),
 			application.NewService(notifier),
 		},
 		Assets: application.AssetOptions{
