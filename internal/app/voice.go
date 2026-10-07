@@ -265,6 +265,47 @@ func (v *VoiceService) CancelDownload() {
 // DetectBinary looks for whisper.cpp's CLI and returns its path ("" if not found).
 func (v *VoiceService) DetectBinary() string { return voice.FindBinary() }
 
+// InstallBinary downloads whisper-cli in the background (progress via
+// EventVoiceDownload with ID "whisper-cli") and selects it once finished.
+func (v *VoiceService) InstallBinary() error {
+	base := voice.WhisperCLIBaseURL
+	if u := os.Getenv("KIMAI_TRACKER_WHISPER_URL"); u != "" {
+		base = u
+	}
+	v.mu.Lock()
+	if v.cancelDownload != nil {
+		v.mu.Unlock()
+		return errors.New("Es läuft bereits ein Download.")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	v.cancelDownload = cancel
+	v.mu.Unlock()
+
+	go func() {
+		defer func() {
+			v.mu.Lock()
+			v.cancelDownload = nil
+			v.mu.Unlock()
+			cancel()
+		}()
+		const id = "whisper-cli"
+		path, err := voice.InstallBinary(ctx, nil, base, func(done, total int64) {
+			v.emit(EventVoiceDownload, DownloadProgress{ID: id, Done: done, Total: total})
+		})
+		p := DownloadProgress{ID: id, Finished: true}
+		switch {
+		case errors.Is(err, context.Canceled):
+			p.Error = "Abgebrochen."
+		case err != nil:
+			p.Error = err.Error()
+		default:
+			_ = v.store.Update(func(c *config.Config) { c.Voice.WhisperBinary = path })
+		}
+		v.emit(EventVoiceDownload, p)
+	}()
+	return nil
+}
+
 // RemoveAPIKey deletes the stored transcription API key.
 func (v *VoiceService) RemoveAPIKey() error {
 	return v.conn.secrets().Delete(config.SecretTranscriptionKey)

@@ -140,12 +140,12 @@ func (a *AssistantService) DownloadModel(id string) error {
 
 // InstallRuntime downloads llama.cpp for this platform in the background.
 func (a *AssistantService) InstallRuntime() error {
-	base := llm.ReleaseBaseURL
+	src := llm.OfficialSource
 	if mirror := os.Getenv("KIMAI_TRACKER_LLAMA_URL"); mirror != "" {
-		base = strings.TrimRight(mirror, "/")
+		src = llm.MirrorSource(mirror)
 	}
 	return a.runDownload("runtime", "llama.cpp", func(ctx context.Context, progress func(int64, int64)) error {
-		server, err := llm.Install(ctx, nil, base, progress)
+		server, err := llm.Install(ctx, nil, src, progress)
 		if err != nil {
 			return err
 		}

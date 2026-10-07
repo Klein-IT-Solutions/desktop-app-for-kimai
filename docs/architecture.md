@@ -171,10 +171,17 @@ Real transcription quality could not be tested there (model downloads are blocke
 ## Local AI (bullet points)
 
 - `internal/llm` downloads llama.cpp's official CPU release build for the platform
-  (`llama-<tag>-bin-ubuntu-x64.tar.gz` etc., names taken from llama.cpp's
-  `release.yml`; built with `RPATH=$ORIGIN`, so it runs unpacked). The newest tag is
-  resolved via the redirect of `/releases/latest` (no API, no rate limit), falling back to
-  a pinned tag. Archives are extracted with path clamping and only relative symlinks.
+  (`llama-<tag>-bin-ubuntu-x64.tar.gz` etc., names from llama.cpp's `release-publish.yml`;
+  built with `RPATH=$ORIGIN`, so it runs unpacked). llama.cpp publishes **pre-releases**,
+  so `/releases/latest` must not be used (it points to an ancient release with other file
+  names). The app asks the GitHub releases API for the newest release that contains the
+  platform's archive; if the API is unavailable or rate-limited it reads the Atom feed and
+  checks with HEAD requests which archive exists. Archives are extracted with path
+  clamping and only relative symlinks.
+- whisper.cpp ships no Linux binaries. `.github/workflows/whisper-cli.yml` builds a static,
+  portable `whisper-cli` (no OpenMP, static libstdc++, AVX2 baseline on x64, glibc 2.35)
+  for x64 and arm64 and publishes it as release `whisper-cli-<version>` of this
+  repository; `voice.InstallBinary` downloads it to `~/.local/share/kimai-tracker/bin`.
 - `llm.Server` starts `llama-server -m MODEL --host 127.0.0.1 --port FREE -c 4096 -np 1`
   on demand, waits for `/health`, uses the OpenAI-compatible `/v1/chat/completions` (the
   server applies the model's chat template) and stops after 5 minutes idle. On Linux the

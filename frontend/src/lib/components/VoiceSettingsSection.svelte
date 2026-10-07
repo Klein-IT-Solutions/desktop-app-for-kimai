@@ -66,6 +66,11 @@
     models = (await VoiceService.Models()) ?? [];
     if (p.error) {
       message = { ok: false, text: p.error };
+    } else if (p.id === "whisper-cli") {
+      const s = await VoiceService.GetSettings();
+      whisperBinary = s.whisperBinary;
+      if (settings) settings.whisperBinary = whisperBinary;
+      message = { ok: true, text: "whisper.cpp installiert." };
     } else {
       const m = models.find((x) => x.id === p.id);
       if (m) whisperModel = m.path;
@@ -80,6 +85,16 @@
     try {
       await VoiceService.DownloadModel(id);
       download = { id, done: 0, total: 0, finished: false };
+    } catch (e) {
+      message = { ok: false, text: errorMessage(e) };
+    }
+  }
+
+  async function installBinary() {
+    message = null;
+    try {
+      await VoiceService.InstallBinary();
+      download = { id: "whisper-cli", done: 0, total: 0, finished: false };
     } catch (e) {
       message = { ok: false, text: errorMessage(e) };
     }
@@ -161,15 +176,34 @@
 
 {#if engine === "local"}
   <section class="mt-2 {group}">
-    <TextField label="Programm" placeholder="whisper-cli" bind:value={whisperBinary}>
-      {#snippet trailing()}
-        {#if !whisperBinary}
-          <button class="no-drag shrink-0 text-[12px] text-accent hover:opacity-75" onclick={detectBinary}>Suchen</button>
-        {/if}
-        <button class="no-drag shrink-0 rounded px-1.5 text-fg-subtle hover:text-fg" title="Durchsuchen" onclick={() => browse("binary")}>…</button>
-      {/snippet}
-    </TextField>
+    {#if download?.id === "whisper-cli"}
+      <div class="flex min-h-10 items-center gap-2 px-3 py-1.5">
+        <div class="min-w-0 flex-1">
+          <div class="text-[13px]">whisper.cpp wird geladen …</div>
+          <div class="mt-1 h-1 overflow-hidden rounded-full bg-fg/10">
+            <div class="h-full rounded-full bg-accent transition-[width] duration-200" style="width:{pct(download)}%"></div>
+          </div>
+        </div>
+        <span class="text-[11px] text-fg-muted tabular-nums">{pct(download)} %</span>
+        <button class="text-[12px] text-danger hover:opacity-75" onclick={() => VoiceService.CancelDownload()}>Abbrechen</button>
+      </div>
+    {:else}
+      <TextField label="Programm" placeholder="whisper-cli" bind:value={whisperBinary}>
+        {#snippet trailing()}
+          {#if !whisperBinary}
+            <button class="no-drag shrink-0 text-[12px] text-accent hover:opacity-75" onclick={installBinary}>Laden</button>
+          {/if}
+          <button class="no-drag shrink-0 rounded px-1.5 text-fg-subtle hover:text-fg" title="Durchsuchen" onclick={() => browse("binary")}>…</button>
+        {/snippet}
+      </TextField>
+    {/if}
   </section>
+  {#if !whisperBinary && !download}
+    <p class="mt-1.5 px-1 text-[11px] leading-snug text-fg-muted">
+      „Laden“ installiert whisper.cpp (≈ 2 MB) für diesen Benutzer.
+      <button class="text-accent hover:opacity-75" onclick={detectBinary}>Vorhandene Installation suchen</button>
+    </p>
+  {/if}
 
   <div class="mt-3 mb-1.5 px-1 text-[11px] font-medium text-fg-muted">Modell</div>
   <section class={group}>

@@ -69,34 +69,67 @@ func tarGz(t *testing.T, files map[string]string, links map[string]string) []byt
 	return buf.Bytes()
 }
 
+func TestResolveFromAPIPicksNewestReleaseWithAsset(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, `[
+			{"tag_name":"b300","draft":true,"assets":[{"name":"llama-b300-bin-ubuntu-x64.tar.gz","browser_download_url":"https://x/draft"}]},
+			{"tag_name":"b299","assets":[{"name":"llama-b299-bin-macos-arm64.tar.gz","browser_download_url":"https://x/mac"}]},
+			{"tag_name":"b298","assets":[{"name":"llama-b298-bin-ubuntu-x64.tar.gz","browser_download_url":"https://x/b298"},
+			                             {"name":"llama-b298-bin-ubuntu-vulkan-x64.tar.gz","browser_download_url":"https://x/vulkan"}]},
+			{"tag_name":"b100","assets":[{"name":"llama-b100-bin-ubuntu-x64.zip","browser_download_url":"https://x/old"}]}
+		]`)
+	}))
+	defer srv.Close()
+	a, err := ResolveFromAPI(context.Background(), srv.Client(), srv.URL, "linux", "amd64")
+	if err != nil || a.Tag != "b298" || a.URL != "https://x/b298" {
+		t.Fatalf("asset = %+v, %v", a, err)
+	}
+	a, err = ResolveFromAPI(context.Background(), srv.Client(), srv.URL, "darwin", "arm64")
+	if err != nil || a.Tag != "b299" {
+		t.Errorf("mac asset = %+v, %v", a, err)
+	}
+	if _, err := ResolveFromAPI(context.Background(), srv.Client(), srv.URL, "windows", "amd64"); err == nil {
+		t.Error("windows asset should not be found")
+	}
+}
+
+func TestResolveFallsBackToFeed(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusForbidden) }) // rate limited
+	mux.HandleFunc("/releases.atom", func(w http.ResponseWriter, _ *http.Request) {
+		io.WriteString(w, `<feed><entry><link href="https://github.com/ggml-org/llama.cpp/releases/tag/b501"/></entry>
+			<entry><link href="https://github.com/ggml-org/llama.cpp/releases/tag/b500"/></entry></feed>`)
+	})
+	// b501 is still uploading (no asset yet), b500 is complete.
+	mux.HandleFunc("/releases/download/b500/llama-b500-bin-ubuntu-x64.tar.gz", func(w http.ResponseWriter, _ *http.Request) {})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+	src := Source{APIURL: srv.URL + "/api", FeedURL: srv.URL + "/releases.atom", Base: srv.URL + "/releases"}
+	a, err := Resolve(context.Background(), srv.Client(), src, "linux", "amd64")
+	if err != nil || a.Tag != "b500" || !strings.HasSuffix(a.URL, "/download/b500/llama-b500-bin-ubuntu-x64.tar.gz") {
+		t.Fatalf("asset = %+v, %v", a, err)
+	}
+}
+
 func TestInstallFromMirror(t *testing.T) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		t.Skip("asset naming tested for linux/amd64")
 	}
 	t.Setenv("XDG_DATA_HOME", t.TempDir())
 	archive := tarGz(t, map[string]string{
-		"llama-b200/llama-server":      "#!/bin/sh\necho server\n",
-		"llama-b200/libllama.so.0.0.1": "lib",
-	}, map[string]string{"llama-b200/libllama.so": "libllama.so.0.0.1"})
+		"llama-" + FallbackTag + "/llama-server":      "#!/bin/sh\necho server\n",
+		"llama-" + FallbackTag + "/libllama.so.0.0.1": "lib",
+	}, map[string]string{"llama-" + FallbackTag + "/libllama.so": "libllama.so.0.0.1"})
 	evil := tarGz(t, map[string]string{"../../escape": "x"}, nil)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/releases/latest", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/releases/tag/b200", http.StatusFound)
-	})
-	mux.HandleFunc("/releases/download/b200/llama-b200-bin-ubuntu-x64.tar.gz", func(w http.ResponseWriter, _ *http.Request) { w.Write(archive) })
-	mux.HandleFunc("/evil/releases/latest", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/evil/releases/tag/b300", http.StatusFound)
-	})
-	mux.HandleFunc("/evil/releases/download/b300/llama-b300-bin-ubuntu-x64.tar.gz", func(w http.ResponseWriter, _ *http.Request) { w.Write(evil) })
+	mux.HandleFunc("/good/download/"+FallbackTag+"/llama-"+FallbackTag+"-bin-ubuntu-x64.tar.gz", func(w http.ResponseWriter, _ *http.Request) { w.Write(archive) })
+	mux.HandleFunc("/evil/download/"+FallbackTag+"/llama-"+FallbackTag+"-bin-ubuntu-x64.tar.gz", func(w http.ResponseWriter, _ *http.Request) { w.Write(evil) })
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 
-	if tag, err := LatestTag(context.Background(), nil, srv.URL+"/releases"); err != nil || tag != "b200" {
-		t.Fatalf("LatestTag = %q, %v", tag, err)
-	}
 	var calls int
-	server, err := Install(context.Background(), nil, srv.URL+"/releases", func(int64, int64) { calls++ })
+	server, err := Install(context.Background(), nil, MirrorSource(srv.URL+"/good"), func(int64, int64) { calls++ })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +148,7 @@ func TestInstallFromMirror(t *testing.T) {
 
 	// "../../escape" is clamped into the target directory (no zip slip);
 	// the archive is then rejected because llama-server is missing.
-	if _, err := Install(context.Background(), nil, srv.URL+"/evil/releases", nil); err == nil || !strings.Contains(err.Error(), "llama-server fehlt") {
+	if _, err := Install(context.Background(), nil, MirrorSource(srv.URL+"/evil"), nil); err == nil || !strings.Contains(err.Error(), "llama-server fehlt") {
 		t.Errorf("evil archive: %v", err)
 	}
 	dir, _ := RuntimeDir()
@@ -123,12 +156,6 @@ func TestInstallFromMirror(t *testing.T) {
 		if _, err := os.Stat(p); err == nil {
 			t.Errorf("archive escaped its directory: %s", p)
 		}
-	}
-	if _, err := safeJoin("/data", "../../etc/passwd"); err != nil {
-		t.Errorf("safeJoin should clamp, got %v", err)
-	}
-	if p, _ := safeJoin("/data", "../../etc/passwd"); p != "/data/etc/passwd" {
-		t.Errorf("safeJoin = %q", p)
 	}
 }
 

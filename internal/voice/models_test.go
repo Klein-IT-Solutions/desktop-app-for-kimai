@@ -1,11 +1,15 @@
 package voice
 
 import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
 	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -82,5 +86,49 @@ func TestFindBinaryAndModelPath(t *testing.T) {
 	m, _ := FindModel("small-q5_1")
 	if p, _ := ModelPath(m); p != filepath.Join(data, "kimai-tracker", "models", "ggml-small-q5_1.bin") {
 		t.Errorf("ModelPath = %q", p)
+	}
+}
+
+func TestInstallBinary(t *testing.T) {
+	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
+		t.Skip("linux/amd64 naming")
+	}
+	data := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", data)
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	dir := "whisper-cli-" + WhisperCLIVersion + "-linux-x64/"
+	for name, body := range map[string]string{dir + "whisper-cli": "#!/bin/sh\n", dir + "LICENSE-whisper.cpp": "MIT"} {
+		tw.WriteHeader(&tar.Header{Name: name, Mode: 0o644, Size: int64(len(body)), Typeflag: tar.TypeReg})
+		tw.Write([]byte(body))
+	}
+	tw.Close()
+	gz.Close()
+	want := "/whisper-cli-" + WhisperCLIVersion + "/whisper-cli-" + WhisperCLIVersion + "-linux-x64.tar.gz"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != want {
+			http.NotFound(w, r)
+			return
+		}
+		w.Write(buf.Bytes())
+	}))
+	defer srv.Close()
+
+	p, err := InstallBinary(context.Background(), nil, srv.URL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p != filepath.Join(data, "kimai-tracker", "bin", "whisper-cli") {
+		t.Errorf("path = %q", p)
+	}
+	if info, err := os.Stat(p); err != nil || info.Mode()&0o111 == 0 {
+		t.Errorf("not executable: %v %v", info, err)
+	}
+	if u, _ := BinaryDownloadURL(WhisperCLIBaseURL, "linux", "amd64"); u != "https://github.com/klein-it-solutions/kimai-desktop-app/releases/download/whisper-cli-"+WhisperCLIVersion+"/whisper-cli-"+WhisperCLIVersion+"-linux-x64.tar.gz" {
+		t.Errorf("url = %q", u)
+	}
+	if _, err := BinaryDownloadURL(WhisperCLIBaseURL, "darwin", "arm64"); err == nil {
+		t.Error("macOS has no download yet")
 	}
 }

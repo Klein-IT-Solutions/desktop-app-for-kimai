@@ -199,12 +199,13 @@ Choose the transcription in *Settings → Speech input*:
 
 | Option | Notes |
 | ------ | ----- |
-| **Local (whisper.cpp)** | Fully offline. The app downloads a model for you (Base 57 MB, Small 181 MB – recommended for German, Medium 514 MB). Needs whisper.cpp's `whisper-cli`; the app finds it in `PATH`, `/usr/local/bin`, Homebrew or `~/.local/share/kimai-tracker/bin`. |
+| **Local (whisper.cpp)** | Fully offline. The app downloads `whisper-cli` (Linux x64/arm64, built by this repository's `whisper-cli` workflow) and a model for you (Base 57 MB, Small 181 MB – recommended for German, Medium 514 MB). An existing `whisper-cli` in `PATH`, `/usr/local/bin` or Homebrew is used as well. |
 | **API** | Any OpenAI-compatible `/audio/transcriptions` endpoint: OpenAI (`whisper-1`, `gpt-4o-mini-transcribe`), Groq (`whisper-large-v3`), a self-hosted faster-whisper server, … The key is stored in the system keyring. The recording is sent to that service. |
 
 The language follows *Settings → General → Language* (default German).
 
-**Installing whisper.cpp** (until it ships with the packages):
+**Installing whisper.cpp manually** (only needed on macOS/Windows for now, or if you prefer
+your own build):
 
 ```bash
 git clone https://github.com/ggml-org/whisper.cpp && cd whisper.cpp
