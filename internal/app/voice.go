@@ -123,6 +123,7 @@ func (v *VoiceService) ServiceStartup(context.Context, application.ServiceOption
 func (v *VoiceService) ServiceShutdown() error {
 	v.ptt.Stop()
 	v.Cancel()
+	voice.ReleaseEmbedded()
 	return nil
 }
 
@@ -265,47 +266,6 @@ func (v *VoiceService) CancelDownload() {
 // DetectBinary looks for whisper.cpp's CLI and returns its path ("" if not found).
 func (v *VoiceService) DetectBinary() string { return voice.FindBinary() }
 
-// InstallBinary downloads whisper-cli in the background (progress via
-// EventVoiceDownload with ID "whisper-cli") and selects it once finished.
-func (v *VoiceService) InstallBinary() error {
-	base := voice.WhisperCLIBaseURL
-	if u := os.Getenv("KIMAI_TRACKER_WHISPER_URL"); u != "" {
-		base = u
-	}
-	v.mu.Lock()
-	if v.cancelDownload != nil {
-		v.mu.Unlock()
-		return errors.New("Es läuft bereits ein Download.")
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	v.cancelDownload = cancel
-	v.mu.Unlock()
-
-	go func() {
-		defer func() {
-			v.mu.Lock()
-			v.cancelDownload = nil
-			v.mu.Unlock()
-			cancel()
-		}()
-		const id = "whisper-cli"
-		path, err := voice.InstallBinary(ctx, nil, base, func(done, total int64) {
-			v.emit(EventVoiceDownload, DownloadProgress{ID: id, Done: done, Total: total})
-		})
-		p := DownloadProgress{ID: id, Finished: true}
-		switch {
-		case errors.Is(err, context.Canceled):
-			p.Error = "Abgebrochen."
-		case err != nil:
-			p.Error = err.Error()
-		default:
-			_ = v.store.Update(func(c *config.Config) { c.Voice.WhisperBinary = path })
-		}
-		v.emit(EventVoiceDownload, p)
-	}()
-	return nil
-}
-
 // RemoveAPIKey deletes the stored transcription API key.
 func (v *VoiceService) RemoveAPIKey() error {
 	return v.conn.secrets().Delete(config.SecretTranscriptionKey)
@@ -316,10 +276,16 @@ func (v *VoiceService) CheckSettings() (string, error) {
 	cfg := v.store.Get().Voice
 	switch cfg.Engine {
 	case config.EngineLocal:
-		if err := (voice.Local{Binary: cfg.WhisperBinary, Model: cfg.WhisperModel}).Check(); err != nil {
+		if cfg.WhisperBinary != "" {
+			if err := (voice.Local{Binary: cfg.WhisperBinary, Model: cfg.WhisperModel}).Check(); err != nil {
+				return "", err
+			}
+			return "Externes whisper-cli und Modell gefunden.", nil
+		}
+		if err := (voice.Embedded{Model: cfg.WhisperModel}).Check(); err != nil {
 			return "", err
 		}
-		return "whisper.cpp und Modell gefunden.", nil
+		return "Bereit – whisper.cpp ist in die App eingebaut.", nil
 	case config.EngineAPI:
 		if err := (voice.API{BaseURL: cfg.APIURL}).Check(); err != nil {
 			return "", err
@@ -441,7 +407,11 @@ func (v *VoiceService) transcribe(ctx context.Context, wav []byte) (string, erro
 	var t voice.Transcriber
 	switch cfg.Voice.Engine {
 	case config.EngineLocal:
-		t = voice.Local{Binary: cfg.Voice.WhisperBinary, Model: cfg.Voice.WhisperModel}
+		if cfg.Voice.WhisperBinary != "" {
+			t = voice.Local{Binary: cfg.Voice.WhisperBinary, Model: cfg.Voice.WhisperModel}
+		} else {
+			t = voice.Embedded{Model: cfg.Voice.WhisperModel}
+		}
 	case config.EngineAPI:
 		key, _ := v.conn.secrets().Get(config.SecretTranscriptionKey)
 		t = voice.API{BaseURL: cfg.Voice.APIURL, APIKey: key, Model: cfg.Voice.APIModel}

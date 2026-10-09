@@ -56,9 +56,10 @@ Requirements:
 - Go ≥ 1.25
 - Node.js ≥ 20 and npm
 - GTK 4 and WebKitGTK 6.0 development files (Ubuntu 24.04 or newer)
+- CMake and Git (whisper.cpp is fetched and compiled into the app on the first build)
 
 ```bash
-sudo apt install build-essential pkg-config libgtk-4-dev libwebkitgtk-6.0-dev
+sudo apt install build-essential pkg-config cmake git libgtk-4-dev libwebkitgtk-6.0-dev
 
 git clone https://github.com/klein-it-solutions/kimai-desktop-app.git
 cd kimai-desktop-app
@@ -73,7 +74,7 @@ The Makefile finds the `wails3` CLI in `$(go env GOPATH)/bin` automatically. To 
 **Ubuntu 22.04:** GTK 4/WebKitGTK 6.0 are not available there. Use the GTK 3 stack instead:
 
 ```bash
-sudo apt install build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
+sudo apt install build-essential pkg-config cmake git libgtk-3-dev libwebkit2gtk-4.1-dev
 make build GTK3=1
 ```
 
@@ -199,22 +200,12 @@ Choose the transcription in *Settings → Speech input*:
 
 | Option | Notes |
 | ------ | ----- |
-| **Local (whisper.cpp)** | Fully offline. The app downloads `whisper-cli` (Linux x64/arm64, built by this repository's `whisper-cli` workflow) and a model for you (Base 57 MB, Small 181 MB – recommended for German, Medium 514 MB). An existing `whisper-cli` in `PATH`, `/usr/local/bin` or Homebrew is used as well. |
+| **Local (whisper.cpp)** | Fully offline. whisper.cpp is compiled into the app – nothing to install. You only download a model once from within the app (Base 57 MB, Small 181 MB – recommended for German, Medium 514 MB). Optionally an external `whisper-cli` can be configured under *Use external whisper-cli*. |
 | **API** | Any OpenAI-compatible `/audio/transcriptions` endpoint: OpenAI (`whisper-1`, `gpt-4o-mini-transcribe`), Groq (`whisper-large-v3`), a self-hosted faster-whisper server, … The key is stored in the system keyring. The recording is sent to that service. |
 
 The language follows *Settings → General → Language* (default German).
 
-**Installing whisper.cpp manually** (only needed on macOS/Windows for now, or if you prefer
-your own build):
-
-```bash
-git clone https://github.com/ggml-org/whisper.cpp && cd whisper.cpp
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
-cmake --build build -j --target whisper-cli
-mkdir -p ~/.local/share/kimai-tracker/bin && cp build/bin/whisper-cli ~/.local/share/kimai-tracker/bin/
-```
-
-Or `brew install whisper-cpp` where Homebrew is available. Behind a firewall that blocks
+Behind a firewall that blocks
 Hugging Face, set `KIMAI_TRACKER_MODEL_URL` to a mirror that serves the `ggml-*.bin` files.
 
 ## Bullet points with a local AI

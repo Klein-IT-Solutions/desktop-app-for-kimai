@@ -65,14 +65,6 @@ export function GetSettings(): $CancellablePromise<$models.VoiceSettings> {
 }
 
 /**
- * InstallBinary downloads whisper-cli in the background (progress via
- * EventVoiceDownload with ID "whisper-cli") and selects it once finished.
- */
-export function InstallBinary(): $CancellablePromise<void> {
-    return $Call.ByID(1357998132);
-}
-
-/**
  * Models lists the downloadable whisper.cpp models.
  */
 export function Models(): $CancellablePromise<$models.ModelStatus[] | null> {

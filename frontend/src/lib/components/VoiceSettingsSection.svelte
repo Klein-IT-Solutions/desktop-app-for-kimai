@@ -33,6 +33,7 @@
   let models = $state<ModelStatus[]>([]);
   let download = $state<DownloadProgress | null>(null);
   let showCustomModel = $state(false);
+  let showExternal = $state(false);
 
   let busy = $state(false);
   let message = $state<{ ok: boolean; text: string } | null>(null);
@@ -66,11 +67,6 @@
     models = (await VoiceService.Models()) ?? [];
     if (p.error) {
       message = { ok: false, text: p.error };
-    } else if (p.id === "whisper-cli") {
-      const s = await VoiceService.GetSettings();
-      whisperBinary = s.whisperBinary;
-      if (settings) settings.whisperBinary = whisperBinary;
-      message = { ok: true, text: "whisper.cpp installiert." };
     } else {
       const m = models.find((x) => x.id === p.id);
       if (m) whisperModel = m.path;
@@ -90,20 +86,10 @@
     }
   }
 
-  async function installBinary() {
-    message = null;
-    try {
-      await VoiceService.InstallBinary();
-      download = { id: "whisper-cli", done: 0, total: 0, finished: false };
-    } catch (e) {
-      message = { ok: false, text: errorMessage(e) };
-    }
-  }
-
   async function detectBinary() {
     const p = await VoiceService.DetectBinary().catch(() => "");
     if (p) whisperBinary = p;
-    else message = { ok: false, text: "whisper.cpp wurde nicht gefunden. Installation siehe Anleitung." };
+    else message = { ok: false, text: "Kein externes whisper-cli gefunden – die eingebaute Version wird verwendet." };
   }
 
   const pct = (p: DownloadProgress) => (p.total > 0 ? Math.round((p.done / p.total) * 100) : 0);
@@ -175,37 +161,7 @@
 </div>
 
 {#if engine === "local"}
-  <section class="mt-2 {group}">
-    {#if download?.id === "whisper-cli"}
-      <div class="flex min-h-10 items-center gap-2 px-3 py-1.5">
-        <div class="min-w-0 flex-1">
-          <div class="text-[13px]">whisper.cpp wird geladen …</div>
-          <div class="mt-1 h-1 overflow-hidden rounded-full bg-fg/10">
-            <div class="h-full rounded-full bg-accent transition-[width] duration-200" style="width:{pct(download)}%"></div>
-          </div>
-        </div>
-        <span class="text-[11px] text-fg-muted tabular-nums">{pct(download)} %</span>
-        <button class="text-[12px] text-danger hover:opacity-75" onclick={() => VoiceService.CancelDownload()}>Abbrechen</button>
-      </div>
-    {:else}
-      <TextField label="Programm" placeholder="whisper-cli" bind:value={whisperBinary}>
-        {#snippet trailing()}
-          {#if !whisperBinary}
-            <button class="no-drag shrink-0 text-[12px] text-accent hover:opacity-75" onclick={installBinary}>Laden</button>
-          {/if}
-          <button class="no-drag shrink-0 rounded px-1.5 text-fg-subtle hover:text-fg" title="Durchsuchen" onclick={() => browse("binary")}>…</button>
-        {/snippet}
-      </TextField>
-    {/if}
-  </section>
-  {#if !whisperBinary && !download}
-    <p class="mt-1.5 px-1 text-[11px] leading-snug text-fg-muted">
-      „Laden“ installiert whisper.cpp (≈ 2 MB) für diesen Benutzer.
-      <button class="text-accent hover:opacity-75" onclick={detectBinary}>Vorhandene Installation suchen</button>
-    </p>
-  {/if}
-
-  <div class="mt-3 mb-1.5 px-1 text-[11px] font-medium text-fg-muted">Modell</div>
+  <div class="mt-2 mb-1.5 px-1 text-[11px] font-medium text-fg-muted">Modell</div>
   <section class={group}>
     {#each models as m (m.id)}
       {@const selected = m.installed && whisperModel === m.path}
@@ -245,11 +201,24 @@
       </TextField>
     </section>
   {/if}
+  <button class="mt-1 block px-1 text-[11px] text-fg-muted hover:text-fg" onclick={() => (showExternal = !showExternal)}>
+    {showExternal || whisperBinary ? "▾" : "▸"} Externes whisper-cli verwenden
+  </button>
+  {#if showExternal || whisperBinary}
+    <section class="mt-1.5 {group}">
+      <TextField label="Programm" placeholder="Leer = eingebaut" bind:value={whisperBinary}>
+        {#snippet trailing()}
+          {#if !whisperBinary}
+            <button class="no-drag shrink-0 text-[12px] text-accent hover:opacity-75" onclick={detectBinary}>Suchen</button>
+          {/if}
+          <button class="no-drag shrink-0 rounded px-1.5 text-fg-subtle hover:text-fg" title="Durchsuchen" onclick={() => browse("binary")}>…</button>
+        {/snippet}
+      </TextField>
+    </section>
+  {/if}
   <p class="mt-1.5 px-1 text-[11px] leading-snug text-fg-muted">
-    Läuft komplett offline. Modelle werden von Hugging Face (whisper.cpp) geladen.
-    <button class="inline-flex items-center gap-0.5 text-accent hover:opacity-75" onclick={() => AppService.OpenURL(MODELS_DOCS)}>
-      whisper.cpp installieren <Icon name="external" size={10} stroke={2} />
-    </button>
+    Läuft komplett offline – whisper.cpp ist in die App eingebaut, nur das Modell wird einmalig geladen
+    (von Hugging Face).
   </p>
 {:else if engine === "api"}
   <section class="mt-2 {group}">

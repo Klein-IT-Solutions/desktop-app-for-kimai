@@ -57,11 +57,25 @@ func TestVoiceSettings(t *testing.T) {
 
 func TestVoiceCheckLocal(t *testing.T) {
 	v, _ := newVoiceFixture(t)
-	if _, err := v.SaveSettings(VoiceSettingsInput{Engine: "local", WhisperBinary: "/nope/whisper-cli", WhisperModel: "/nope/model.bin"}); err != nil {
+	if _, err := v.SaveSettings(VoiceSettingsInput{Engine: "local", WhisperModel: "/nope/model.bin"}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := v.CheckSettings(); err == nil {
-		t.Error("missing binary should fail")
+		t.Error("missing model should fail (embedded engine)")
+	}
+	model0 := filepath.Join(t.TempDir(), "ggml-base.bin")
+	os.WriteFile(model0, []byte("x"), 0o644)
+	if _, err := v.SaveSettings(VoiceSettingsInput{Engine: "local", WhisperModel: model0}); err != nil {
+		t.Fatal(err)
+	}
+	if msg, err := v.CheckSettings(); err != nil || msg == "" {
+		t.Errorf("embedded engine with model: %q, %v", msg, err)
+	}
+	if _, err := v.SaveSettings(VoiceSettingsInput{Engine: "local", WhisperBinary: "/nope/whisper-cli", WhisperModel: model0}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := v.CheckSettings(); err == nil {
+		t.Error("missing external binary should fail")
 	}
 	dir := t.TempDir()
 	bin, model := filepath.Join(dir, "whisper-cli"), filepath.Join(dir, "ggml-base.bin")

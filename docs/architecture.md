@@ -153,7 +153,7 @@ wordmark is shown.
   Whisper expects. Max. 2 minutes per recording. `Recorder.Stop` waits until the samples
   cover the recorded time (≤ 3 s), because some sound servers deliver capture data late;
   otherwise the end of a sentence would be cut off.
-- `voice.Local` runs `whisper-cli -m MODEL -f FILE -l LANG -t N -nt -np` and strips
+- `voice.Local` (optional external program) runs `whisper-cli -m MODEL -f FILE -l LANG -t N -nt -np` and strips
   markers such as `[BLANK_AUDIO]`. `voice.API` posts multipart form data to
   `{url}/audio/transcriptions` (`model`, `language`, `response_format=json`).
 - Models (quantised, multilingual) are downloaded from the whisper.cpp Hugging Face
@@ -178,10 +178,12 @@ Real transcription quality could not be tested there (model downloads are blocke
   platform's archive; if the API is unavailable or rate-limited it reads the Atom feed and
   checks with HEAD requests which archive exists. Archives are extracted with path
   clamping and only relative symlinks.
-- whisper.cpp ships no Linux binaries. `.github/workflows/whisper-cli.yml` builds a static,
-  portable `whisper-cli` (no OpenMP, static libstdc++, AVX2 baseline on x64, glibc 2.35)
-  for x64 and arm64 and publishes it as release `whisper-cli-<version>` of this
-  repository; `voice.InstallBinary` downloads it to `~/.local/share/kimai-tracker/bin`.
+- whisper.cpp is **compiled into the app** (`voice.Embedded`, cgo against the static
+  libraries). `make whisper` clones the pinned release (`WHISPER_VERSION` in the Makefile)
+  into `third_party/` and builds it for the host OS only (`GGML_NATIVE=OFF`: AVX2/FMA
+  baseline on x64, no OpenMP), so builds are portable and no runtime download of a program
+  is needed. The loaded model stays in memory between recordings and is freed after
+  5 minutes. An external `whisper-cli` (`voice.Local`) is used only when configured.
 - `llm.Server` starts `llama-server -m MODEL --host 127.0.0.1 --port FREE -c 4096 -np 1`
   on demand, waits for `/health`, uses the OpenAI-compatible `/v1/chat/completions` (the
   server applies the model's chat template) and stops after 5 minutes idle. On Linux the
