@@ -45,9 +45,12 @@ Developed and maintained by **[Klein IT Solutions](https://klein-it.solutions)**
 
 ## Installation
 
-Prebuilt `.deb` and AppImage packages will be published on the
-[Releases](https://github.com/klein-it-solutions/kimai-desktop-app/releases) page
-once packaging (step 6) is done. Until then, build from source.
+Prebuilt packages are on the
+[Releases](https://github.com/klein-it-solutions/kimai-desktop-app/releases) page:
+
+- **Ubuntu 24.04+ / Debian 13+:** `sudo apt install ./kimai-tracker_<version>_amd64.deb`
+- **Other distributions:** `Kimai-Tracker-<version>-x86_64.AppImage` – make it executable
+  (`chmod +x`) and start it.
 
 ### Build from source (Ubuntu)
 
@@ -88,7 +91,24 @@ make build GTK3=1
 | `make lint`  | `go vet` and `gofmt` check                        |
 | `make kimai-up` / `make kimai-down` | Local Kimai test instance in Docker |
 | `make test-integration` | API tests against a real Kimai          |
+| `make version` | Version that would be built (from the latest `v*` tag) |
 | `make help`  | All targets                                       |
+
+### Releasing
+
+Every release gets its own version and Git tag. The version is compiled into the app
+(shown in the settings) and used for the package names.
+
+- **From GitHub:** *Actions → Release → Run workflow*, choose `patch`, `minor` or `major`.
+  The workflow takes the latest `v*` tag, increases it (`v0.1.0` → `v0.1.1`; the first
+  release is `v0.1.0`), creates the tag, runs the tests, builds the `.deb` and AppImage
+  and publishes a GitHub release with checksums and generated release notes.
+- **From the command line:** `git tag v1.2.0 && git push origin v1.2.0` builds exactly
+  that version. Tags with a suffix (`v1.2.0-rc.1`) become pre-releases.
+
+Local builds are versioned via `git describe` (e.g. `0.1.0-3-gabc123`); override with
+`make package VERSION=1.2.3`. Every push and pull request runs the CI workflow
+(lint, tests, build).
 
 ### Testing against a local Kimai
 

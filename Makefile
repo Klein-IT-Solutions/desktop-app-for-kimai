@@ -9,6 +9,13 @@
 
 APP     := kimai-tracker
 
+# Version from the latest v* tag (e.g. v0.2.0 → 0.2.0; between releases
+# 0.2.0-3-gabc123). The release workflow passes VERSION explicitly.
+VERSION ?= $(shell git describe --tags --match 'v[0-9]*' --dirty 2>/dev/null | sed 's/^v//' || true)
+ifeq ($(VERSION),)
+VERSION := 0.0.0-dev
+endif
+
 # `go install` puts wails3 into $GOBIN (default: $(go env GOPATH)/bin), which is
 # often not on PATH. Prepend it so both make and the Wails Taskfiles find it.
 GOBIN   := $(or $(shell go env GOBIN),$(shell go env GOPATH)/bin)
@@ -25,7 +32,7 @@ ifeq ($(GTK3),1)
 TAGS := gtk3
 endif
 
-.PHONY: help deps check-wails whisper dev build run test test-go test-integration check-frontend lint package clean kimai-up kimai-down
+.PHONY: help deps check-wails whisper dev build run test test-go test-integration check-frontend lint package version clean kimai-up kimai-down
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -54,7 +61,7 @@ dev: check-wails whisper ## Run in development mode with hot reload
 	EXTRA_TAGS=$(TAGS) $(WAILS) dev -config ./build/config.yml
 
 build: check-wails whisper ## Build a production binary into ./bin
-	$(WAILS) build EXTRA_TAGS=$(TAGS)
+	$(WAILS) build EXTRA_TAGS=$(TAGS) VERSION=$(VERSION)
 
 run: build ## Build and start the app
 	./bin/$(APP)
@@ -82,8 +89,11 @@ lint: whisper ## go vet + gofmt check
 	@test -z "$$(gofmt -l $$(git ls-files "*.go"))" || (echo "gofmt needed:"; gofmt -l $$(git ls-files "*.go"); exit 1)
 
 package: check-wails whisper ## Build .deb and AppImage into ./bin
-	$(WAILS) task linux:create:deb EXTRA_TAGS=$(TAGS)
-	$(WAILS) task linux:create:appimage EXTRA_TAGS=$(TAGS)
+	$(WAILS) task linux:create:deb EXTRA_TAGS=$(TAGS) VERSION=$(VERSION)
+	$(WAILS) task linux:create:appimage EXTRA_TAGS=$(TAGS) VERSION=$(VERSION)
+
+version: ## Print the version that would be built
+	@echo $(VERSION)
 
 clean: ## Remove build output
 	rm -rf bin frontend/dist .task $(WHISPER_DIR)/build
