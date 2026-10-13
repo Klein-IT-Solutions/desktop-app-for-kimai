@@ -70,7 +70,7 @@ func newEntriesFixture(t *testing.T) (*EntriesService, *TrackerService, *fakeEnt
 			json.NewEncoder(w).Encode(list)
 		case r.Method == "POST":
 			ts := map[string]any{"id": f.nextID, "begin": stamp(body["begin"]), "end": stamp(body["end"]),
-				"project": map[string]any{"id": body["project"], "name": "Web", "customer": map[string]any{"id": 1, "name": "ACME"}},
+				"project":  map[string]any{"id": body["project"], "name": "Web", "customer": map[string]any{"id": 1, "name": "ACME"}},
 				"activity": map[string]any{"id": body["activity"], "name": "Dev"}, "description": body["description"]}
 			f.sheets[f.nextID] = ts
 			f.nextID++

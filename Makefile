@@ -98,7 +98,7 @@ check-frontend: ## Type-check the Svelte/TypeScript frontend
 
 lint: whisper ## go vet + gofmt check
 	go vet ./internal/...
-	@test -z "$$(gofmt -l $$(git ls-files "*.go"))" || (echo "gofmt needed:"; gofmt -l $$(git ls-files "*.go"); exit 1)
+	@test -z "$$(gofmt -l $$(git ls-files --cached --others --exclude-standard "*.go"))" || (echo "gofmt needed:"; gofmt -l $$(git ls-files --cached --others --exclude-standard "*.go"); exit 1)
 
 package: check-wails whisper ## Build packages into ./bin (Linux: .deb + AppImage, Windows: installer)
 ifeq ($(OS),Windows_NT)
