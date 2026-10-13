@@ -95,6 +95,7 @@ app (*Settings → Info*) and used for the package names.
   `v0.1.1`; the first release is `v0.1.0`), creates the tag, runs the tests on
   Linux and Windows, builds the packages and publishes a GitHub release with
   checksums and generated release notes.
+  For a specific version, enter it in the *version* field (e.g. `1.0.0`) instead.
 - **From the command line:** `git tag v1.2.0 && git push origin v1.2.0` builds
   exactly that version. Tags with a suffix (`v1.2.0-rc.1`) become pre-releases.
 
