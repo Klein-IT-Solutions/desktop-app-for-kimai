@@ -194,4 +194,4 @@ Kimai Tracker ist ein unabhängiges Projekt und kein offizielles Produkt des Kim
 
 ---
 
-<sub>Mit Sorgfalt entwickelt von <a href="https://klein-it.solutions">Klein IT Solutions</a>.</sub>
+<sub>Mit KI entwickelt von <a href="https://klein-it.solutions">Klein IT Solutions</a>.</sub>
