@@ -3,6 +3,7 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
@@ -42,7 +43,7 @@ func TestVoiceSettings(t *testing.T) {
 	if !s.HasAPIKey || secrets[config.SecretTranscriptionKey] != "gsk-123" || s.APIURL != "https://api.groq.com/openai/v1" {
 		t.Errorf("settings = %+v, key = %q", s, secrets[config.SecretTranscriptionKey])
 	}
-	if got := v.store.Get().Voice.PushToTalk; got != "Super+Shift+V" {
+	if got := v.store.Get().Voice.PushToTalk; got != config.DefaultPushToTalk {
 		t.Errorf("push-to-talk = %q", got)
 	}
 	if msg, err := v.CheckSettings(); err != nil || msg == "" {
@@ -78,7 +79,7 @@ func TestVoiceCheckLocal(t *testing.T) {
 		t.Error("missing external binary should fail")
 	}
 	dir := t.TempDir()
-	bin, model := filepath.Join(dir, "whisper-cli"), filepath.Join(dir, "ggml-base.bin")
+	bin, model := filepath.Join(dir, "whisper-cli"+exeSuffix()), filepath.Join(dir, "ggml-base.bin")
 	os.WriteFile(bin, []byte("#!/bin/sh\n"), 0o755)
 	os.WriteFile(model, []byte("x"), 0o644)
 	if _, err := v.SaveSettings(VoiceSettingsInput{Engine: "local", WhisperBinary: bin, WhisperModel: model}); err != nil {
@@ -97,4 +98,11 @@ func TestVoiceStartWhenOff(t *testing.T) {
 	if st := v.State(); st.State != VoiceIdle || st.Error == "" {
 		t.Errorf("state = %+v", st)
 	}
+}
+
+func exeSuffix() string {
+	if runtime.GOOS == "windows" {
+		return ".exe"
+	}
+	return ""
 }

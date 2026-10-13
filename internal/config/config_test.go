@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/zalando/go-keyring"
@@ -31,7 +32,8 @@ func TestUpdatePersistsWithPrivatePermissions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if perm := info.Mode().Perm(); perm != 0o600 {
+	// Windows has no Unix modes; the profile directory is private by ACL.
+	if perm := info.Mode().Perm(); perm != 0o600 && runtime.GOOS != "windows" {
 		t.Errorf("permissions = %o, want 600", perm)
 	}
 
@@ -86,7 +88,7 @@ func TestFileSecrets(t *testing.T) {
 		t.Fatal(err)
 	}
 	info, err := os.Stat(f.Path)
-	if err != nil || info.Mode().Perm() != 0o600 {
+	if err != nil || (info.Mode().Perm() != 0o600 && runtime.GOOS != "windows") {
 		t.Fatalf("stat = %v, %v; want mode 600", info, err)
 	}
 	if v, err := f.Get("a"); err != nil || v != "1" {

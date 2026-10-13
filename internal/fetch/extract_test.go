@@ -1,6 +1,9 @@
 package fetch
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 func TestSafeJoinClamps(t *testing.T) {
 	for in, want := range map[string]string{
@@ -8,7 +11,8 @@ func TestSafeJoinClamps(t *testing.T) {
 		"llama-b1/bin/server": "/data/llama-b1/bin/server",
 		`..\..\win.ini`:       "/data/win.ini",
 	} {
-		if p, err := safeJoin("/data", in); err != nil || p != want {
+		want = filepath.FromSlash(want)
+		if p, err := safeJoin(filepath.FromSlash("/data"), in); err != nil || p != want {
 			t.Errorf("safeJoin(%q) = %q, %v; want %q", in, p, err, want)
 		}
 	}

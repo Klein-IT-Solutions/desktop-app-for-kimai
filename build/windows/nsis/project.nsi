@@ -61,6 +61,7 @@ ManifestDPIAware true
 # !insertmacro MUI_PAGE_LICENSE "resources\eula.txt" # Adds a EULA page to the installer
 !insertmacro MUI_PAGE_DIRECTORY # In which folder install page.
 !insertmacro MUI_PAGE_INSTFILES # Installing page.
+!define MUI_FINISHPAGE_RUN "$INSTDIR\${PRODUCT_EXECUTABLE}" # Offer to start the app
 !insertmacro MUI_PAGE_FINISH # Finished installation page.
 
 !insertmacro MUI_UNPAGE_INSTFILES # Uninstalling page
@@ -86,6 +87,7 @@ FunctionEnd
 
 Section
     !insertmacro wails.setShellContext
+    nsExec::Exec 'taskkill /F /IM "${PRODUCT_EXECUTABLE}"' # The running app locks its files; a running timer continues in Kimai
 
     !insertmacro wails.webview2runtime
 
@@ -104,6 +106,7 @@ SectionEnd
 
 Section "uninstall" 
     !insertmacro wails.setShellContext
+    nsExec::Exec 'taskkill /F /IM "${PRODUCT_EXECUTABLE}"' # The running app locks its files; a running timer continues in Kimai
 
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
 
@@ -111,6 +114,7 @@ Section "uninstall"
 
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Kimai Tracker" # "Start at login"
 
     !insertmacro wails.unassociateFiles
     !insertmacro wails.unassociateCustomProtocols

@@ -11,7 +11,7 @@ Thanks for helping to improve Kimai Tracker!
 ## Pull requests
 
 1. Fork the repository and create a branch from `main`.
-2. Set up the build as described in the [README](README.md#build-from-source-ubuntu).
+2. Set up the build as described in [docs/development.md](docs/development.md).
 3. Keep changes focused; one topic per pull request.
 4. Run the checks before pushing:
 

@@ -456,4 +456,4 @@ func (s *ShellService) CloseWindow() { s.shell.CloseWindow() }
 // Quit exits the app.
 func (s *ShellService) Quit() { s.shell.Quit() }
 
-func autostartSupported() bool { return runtime.GOOS == "linux" }
+func autostartSupported() bool { return runtime.GOOS == "linux" || runtime.GOOS == "windows" }

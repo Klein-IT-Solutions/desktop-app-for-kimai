@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 )
 
@@ -60,11 +61,20 @@ type VoiceConfig struct {
 	PushToTalk string `json:"pushToTalk"`
 }
 
-// DefaultPushToTalk is held down while speaking.
-const DefaultPushToTalk = "Super+Shift+V"
+// DefaultPushToTalk is held down while speaking. Windows reserves most
+// Win+Shift combinations (Win+Shift+V cycles notifications), so it gets
+// Ctrl+Alt shortcuts.
+var DefaultPushToTalk = platformDefault("Super+Shift+V", "Ctrl+Alt+V")
 
 // DefaultHotkey toggles the window.
-const DefaultHotkey = "Super+Shift+T"
+var DefaultHotkey = platformDefault("Super+Shift+T", "Ctrl+Alt+T")
+
+func platformDefault(other, windows string) string {
+	if runtime.GOOS == "windows" {
+		return windows
+	}
+	return other
+}
 
 // Token storage backends.
 const (

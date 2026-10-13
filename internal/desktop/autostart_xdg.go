@@ -1,3 +1,5 @@
+//go:build !windows
+
 package desktop
 
 import (
@@ -8,9 +10,6 @@ import (
 	"runtime"
 	"strings"
 )
-
-// ErrUnsupported is returned where a feature is not implemented for the OS.
-var ErrUnsupported = errors.New("not supported on this platform")
 
 // AutostartFile returns ~/.config/autostart/kimai-tracker.desktop.
 func AutostartFile() (string, error) {

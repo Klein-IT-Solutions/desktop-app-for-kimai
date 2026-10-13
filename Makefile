@@ -19,6 +19,9 @@ endif
 # `go install` puts wails3 into $GOBIN (default: $(go env GOPATH)/bin), which is
 # often not on PATH. Prepend it so both make and the Wails Taskfiles find it.
 GOBIN   := $(or $(shell go env GOBIN),$(shell go env GOPATH)/bin)
+ifeq ($(OS),Windows_NT)
+GOBIN   := $(shell cygpath -u "$(GOBIN)")
+endif
 export PATH := $(GOBIN):$(PATH)
 WAILS   ?= wails3
 
@@ -30,6 +33,11 @@ WHISPER_LIB     := $(WHISPER_DIR)/build/src/libwhisper.a
 
 ifeq ($(GTK3),1)
 TAGS := gtk3
+endif
+
+# Windows: build with MinGW-w64 (MSYS2) and Ninja.
+ifeq ($(OS),Windows_NT)
+WHISPER_CMAKE_ARGS := -G Ninja
 endif
 
 .PHONY: help deps check-wails whisper dev build run test test-go test-integration check-frontend lint package version clean kimai-up kimai-down
@@ -49,10 +57,14 @@ $(WHISPER_LIB):
 	@if [ ! -d $(WHISPER_DIR)/.git ]; then \
 		git clone --depth 1 --branch $(WHISPER_VERSION) https://github.com/ggml-org/whisper.cpp $(WHISPER_DIR); \
 	fi
-	cmake -S $(WHISPER_DIR) -B $(WHISPER_DIR)/build -DCMAKE_BUILD_TYPE=Release \
+	cmake -S $(WHISPER_DIR) -B $(WHISPER_DIR)/build $(WHISPER_CMAKE_ARGS) -DCMAKE_BUILD_TYPE=Release \
 		-DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 		-DWHISPER_BUILD_EXAMPLES=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_SERVER=OFF
 	cmake --build $(WHISPER_DIR)/build -j --target whisper
+	@# MinGW names the ggml libraries without the lib prefix the linker looks for.
+	@for f in $(WHISPER_DIR)/build/ggml/src/ggml*.a; do \
+		[ -e "$$f" ] && cp -f "$$f" "$$(dirname "$$f")/lib$$(basename "$$f")"; \
+	done; true
 
 check-wails:
 	@command -v $(WAILS) >/dev/null 2>&1 || { echo "wails3 not found in $(GOBIN) – run 'make deps' first."; exit 1; }
@@ -88,9 +100,13 @@ lint: whisper ## go vet + gofmt check
 	go vet ./internal/...
 	@test -z "$$(gofmt -l $$(git ls-files "*.go"))" || (echo "gofmt needed:"; gofmt -l $$(git ls-files "*.go"); exit 1)
 
-package: check-wails whisper ## Build .deb and AppImage into ./bin
+package: check-wails whisper ## Build packages into ./bin (Linux: .deb + AppImage, Windows: installer)
+ifeq ($(OS),Windows_NT)
+	$(WAILS) task windows:package VERSION=$(VERSION)
+else
 	$(WAILS) task linux:create:deb EXTRA_TAGS=$(TAGS) VERSION=$(VERSION)
 	$(WAILS) task linux:create:appimage EXTRA_TAGS=$(TAGS) VERSION=$(VERSION)
+endif
 
 version: ## Print the version that would be built
 	@echo $(VERSION)

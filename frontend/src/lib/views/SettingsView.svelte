@@ -151,6 +151,7 @@
   });
 
   const sessionLabel = (t: string) => (t === "wayland" ? "Wayland" : t === "x11" ? "X11" : "–");
+  const platformLabel = (p: string) => ({ linux: "Linux", windows: "Windows", darwin: "macOS" })[p] ?? (p || "–");
   const group =
     "overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_0.5px_var(--hairline)] [&>*+*]:border-t [&>*+*]:border-hairline";
   const heading = "mb-1.5 px-1 text-[11px] font-medium tracking-wide text-fg-muted uppercase";
@@ -331,7 +332,7 @@
 
   <h2 class="mt-5 {heading}">Info</h2>
   <section class={group}>
-    {#each [["Version", info?.version ?? "–"], ["Plattform", info?.platform ?? "–"], ["Sitzung", sessionLabel(info?.sessionType ?? "")]] as [k, v]}
+    {#each [["Version", info?.version ?? "–"], ["Plattform", platformLabel(info?.platform ?? "")], ...(info?.platform === "linux" ? [["Sitzung", sessionLabel(info?.sessionType ?? "")]] : [])] as [k, v]}
       <div class="flex h-9 items-center justify-between px-3">
         <span>{k}</span>
         <span class="text-fg-muted">{v}</span>

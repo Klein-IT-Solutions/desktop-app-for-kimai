@@ -38,7 +38,16 @@ it in v3.1.
   frameless windows. Remove it once Wails handles this itself.
 - Linux has no portable "blur behind window" API (KDE offers one, GNOME doesn't).
   The frosted look is therefore a tinted, semi-transparent surface plus a subtle
-  noise texture. On macOS/Windows the native translucent backdrop is enabled.
+  noise texture. On macOS the native translucent backdrop is enabled. On Windows the
+  window is transparent (DirectComposition) and draws the same CSS surface; the
+  native frameless decorations (Aero shadow, Windows 11 rounded corners) are
+  disabled, because they would outline the transparent shadow margin.
+- Windows: global shortcuts use `RegisterHotKey` on a locked OS thread with its own
+  message loop; push-to-talk polls `GetAsyncKeyState` for the key release.
+  Autostart is the per-user `Run` registry key. whisper.cpp and miniaudio are built
+  with MinGW-w64 and linked statically (`-static`), so the .exe needs only system
+  DLLs. Default shortcuts are Ctrl+Alt+T / Ctrl+Alt+V, because Windows reserves
+  most Win+Shift combinations.
 - Window buttons follow the platform (`internal/desktop.DetectWindowControls`):
   macOS traffic lights on the left; Windows 11 caption buttons on the right; on Linux
   Adwaita-style buttons (GNOME and others) or Breeze-style (KDE, via

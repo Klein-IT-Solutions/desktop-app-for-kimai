@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -73,7 +74,7 @@ func TestFindBinaryAndModelPath(t *testing.T) {
 	if p := FindBinary(); p != "" && !strings.HasPrefix(p, "/usr/local/bin") && !strings.Contains(p, "brew") {
 		t.Errorf("unexpected binary %q", p)
 	}
-	bin := filepath.Join(data, "kimai-tracker", "bin", "whisper-cli")
+	bin := filepath.Join(data, "kimai-tracker", "bin", "whisper-cli"+exeSuffix())
 	os.MkdirAll(filepath.Dir(bin), 0o755)
 	os.WriteFile(bin, []byte("#!/bin/sh\n"), 0o755)
 	if p := FindBinary(); p != bin && !strings.HasPrefix(p, "/usr/local/bin") {
@@ -83,4 +84,11 @@ func TestFindBinaryAndModelPath(t *testing.T) {
 	if p, _ := ModelPath(m); p != filepath.Join(data, "kimai-tracker", "models", "ggml-small-q5_1.bin") {
 		t.Errorf("ModelPath = %q", p)
 	}
+}
+
+func exeSuffix() string {
+	if runtime.GOOS == "windows" {
+		return ".exe"
+	}
+	return ""
 }

@@ -8,6 +8,7 @@ require (
 	github.com/jezek/xgb v1.3.1
 	github.com/wailsapp/wails/v3 v3.0.0-beta.28
 	github.com/zalando/go-keyring v0.2.8
+	golang.org/x/sys v0.46.0
 )
 
 require (
@@ -18,5 +19,4 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	golang.org/x/sys v0.46.0 // indirect
 )

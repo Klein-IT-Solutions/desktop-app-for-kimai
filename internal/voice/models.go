@@ -98,9 +98,12 @@ func FindBinary() string {
 		if p, err := exec.LookPath(name); err == nil {
 			return p
 		}
+		if runtime.GOOS == "windows" {
+			name += ".exe"
+		}
 		for _, d := range dirs {
 			p := filepath.Join(d, name)
-			if info, err := os.Stat(p); err == nil && !info.IsDir() && info.Mode()&0o111 != 0 {
+			if info, err := os.Stat(p); err == nil && !info.IsDir() && (runtime.GOOS == "windows" || info.Mode()&0o111 != 0) {
 				return p
 			}
 		}

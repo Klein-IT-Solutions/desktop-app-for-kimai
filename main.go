@@ -139,7 +139,9 @@ func main() {
 			TitleBar: application.MacTitleBarHiddenInset,
 		},
 		Windows: application.WindowsWindow{
-			BackdropType: application.Acrylic,
+			// The rounded window and its shadow are drawn by the page inside a
+			// transparent margin; a native frame shadow would outline that margin.
+			DisableFramelessWindowDecorations: true,
 		},
 		Linux: application.LinuxWindow{
 			WindowIsTranslucent: true,

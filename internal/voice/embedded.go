@@ -5,6 +5,7 @@ package voice
 #cgo LDFLAGS: -L${SRCDIR}/../../third_party/whisper.cpp/build/src -L${SRCDIR}/../../third_party/whisper.cpp/build/ggml/src
 #cgo LDFLAGS: -lwhisper -lggml -lggml-cpu -lggml-base -lstdc++ -lm
 #cgo linux LDFLAGS: -lpthread -ldl
+#cgo windows LDFLAGS: -static
 #cgo darwin LDFLAGS: -framework Accelerate -framework Foundation
 #include <stdlib.h>
 #include <whisper.h>
