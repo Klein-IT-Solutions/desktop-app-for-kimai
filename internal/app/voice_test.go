@@ -43,7 +43,7 @@ func TestVoiceSettings(t *testing.T) {
 	if !s.HasAPIKey || secrets[config.SecretTranscriptionKey] != "gsk-123" || s.APIURL != "https://api.groq.com/openai/v1" {
 		t.Errorf("settings = %+v, key = %q", s, secrets[config.SecretTranscriptionKey])
 	}
-	if got := v.store.Get().Voice.PushToTalk; got != config.DefaultPushToTalk {
+	if got := v.store.Get().Voice.PushToTalk; got != "Super+Shift+V" {
 		t.Errorf("push-to-talk = %q", got)
 	}
 	if msg, err := v.CheckSettings(); err != nil || msg == "" {
