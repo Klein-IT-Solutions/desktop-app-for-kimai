@@ -110,7 +110,8 @@ tasks:
     dir: build
     cmds:
       # File version from VERSION (numeric part, e.g. 1.2.0 for 1.2.0-rc.1).
-      - sed 's/"0\.1\.0"/"{{.FILE_VERSION}}"/g' windows/info.json > windows/info.gen.json
+      # (no quotes inside the sed script: they get mangled when Task runs MSYS sed on Windows)
+      - sed s/0[.]1[.]0/{{.FILE_VERSION}}/g windows/info.json > windows/info.gen.json
       - wails3 generate syso -arch {{.ARCH}} -icon windows/icon.ico -manifest windows/wails.exe.manifest -info windows/info.gen.json -out ../wails_windows_{{.ARCH}}.syso
       - rm -f windows/info.gen.json
     vars:
