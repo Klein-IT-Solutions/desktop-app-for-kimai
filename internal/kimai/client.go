@@ -13,6 +13,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -205,6 +206,71 @@ func (c *Client) UpdateDescription(ctx context.Context, id int, description stri
 	return ts, err
 }
 
+// Timesheets returns the user's timesheets that begin in [from, to], oldest
+// first, with project, customer and activity expanded (GET /api/timesheets).
+// A running timesheet is included.
+func (c *Client) Timesheets(ctx context.Context, from, to time.Time) ([]Timesheet, error) {
+	loc := c.location()
+	q := url.Values{
+		"begin":   {from.In(loc).Format(dateTimeFormat)},
+		"end":     {to.In(loc).Format(dateTimeFormat)},
+		"full":    {"true"},
+		"orderBy": {"begin"},
+		"order":   {"ASC"},
+		"size":    {"500"},
+	}
+	var out []Timesheet
+	err := c.do(ctx, http.MethodGet, "/api/timesheets", q, nil, &out)
+	return out, err
+}
+
+// EntryInput describes a timesheet that is created or changed afterwards.
+type EntryInput struct {
+	ProjectID   int
+	ActivityID  int
+	Description string
+	Begin       time.Time
+	// End is required for new entries; on updates a zero End leaves a
+	// running timesheet running.
+	End time.Time
+}
+
+func (c *Client) entryBody(in EntryInput) map[string]any {
+	body := map[string]any{
+		"project":     in.ProjectID,
+		"activity":    in.ActivityID,
+		"begin":       in.Begin.In(c.location()).Format(dateTimeFormat),
+		"description": in.Description,
+	}
+	if !in.End.IsZero() {
+		body["end"] = in.End.In(c.location()).Format(dateTimeFormat)
+	}
+	return body
+}
+
+// CreateTimesheet adds a finished timesheet (POST /api/timesheets).
+func (c *Client) CreateTimesheet(ctx context.Context, in EntryInput) (Timesheet, error) {
+	if in.End.IsZero() {
+		return Timesheet{}, errors.New("kimai: end time required")
+	}
+	var ts Timesheet
+	err := c.do(ctx, http.MethodPost, "/api/timesheets", url.Values{"full": {"true"}}, c.entryBody(in), &ts)
+	return ts, err
+}
+
+// UpdateTimesheet changes times, project, activity and description of a
+// timesheet (PATCH /api/timesheets/{id}).
+func (c *Client) UpdateTimesheet(ctx context.Context, id int, in EntryInput) (Timesheet, error) {
+	var ts Timesheet
+	err := c.do(ctx, http.MethodPatch, fmt.Sprintf("/api/timesheets/%d", id), url.Values{"full": {"true"}}, c.entryBody(in), &ts)
+	return ts, err
+}
+
+// DeleteTimesheet deletes a timesheet (DELETE /api/timesheets/{id}).
+func (c *Client) DeleteTimesheet(ctx context.Context, id int) error {
+	return c.do(ctx, http.MethodDelete, fmt.Sprintf("/api/timesheets/%d", id), nil, nil, nil)
+}
+
 // ---- Transport -------------------------------------------------------------
 
 func visibleQuery() url.Values {
@@ -261,10 +327,12 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		apiErr := &APIError{StatusCode: resp.StatusCode}
 		var payload struct {
-			Message string `json:"message"`
+			Message string          `json:"message"`
+			Errors  json.RawMessage `json:"errors"`
 		}
 		if isJSON(resp.Header.Get("Content-Type")) && json.Unmarshal(data, &payload) == nil {
 			apiErr.Message = payload.Message
+			apiErr.Details = validationMessages(payload.Errors)
 		}
 		return apiErr
 	}
@@ -322,4 +390,26 @@ func (c *Client) Check(ctx context.Context) (ConnectionInfo, error) {
 		return info, err
 	}
 	return info, nil
+}
+
+// validationMessages collects the messages of a Kimai/Symfony form error tree:
+// {"errors":["…"],"children":{"end":{"errors":["…"]}}}.
+func validationMessages(raw json.RawMessage) []string {
+	var node struct {
+		Errors   []string                   `json:"errors"`
+		Children map[string]json.RawMessage `json:"children"`
+	}
+	if len(raw) == 0 || json.Unmarshal(raw, &node) != nil {
+		return nil
+	}
+	out := node.Errors
+	names := make([]string, 0, len(node.Children))
+	for name := range node.Children {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		out = append(out, validationMessages(node.Children[name])...)
+	}
+	return out
 }

@@ -3,7 +3,7 @@ import {
   type AssistantSettings,
 } from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
 import { errorMessage } from "./connection.svelte";
-import { setDescription, tracker } from "./tracker.svelte";
+import { descriptionTarget, type DescriptionTarget } from "./descriptionTarget";
 
 /** Local AI (bullet points) state. */
 export const assistant = $state({
@@ -13,6 +13,8 @@ export const assistant = $state({
   // Previous description for "Rückgängig".
   undo: null as string | null,
 });
+
+let undoTarget: DescriptionTarget | null = null;
 
 export const assistantReady = () => !!assistant.settings?.enabled && !!assistant.settings?.ready;
 
@@ -32,12 +34,13 @@ let undoTimer: ReturnType<typeof setTimeout> | undefined;
 
 /** Turns the whole description into bullet points (undoable). */
 export async function summarizeDescription() {
-  const text = tracker.state.description.trim();
+  const target = descriptionTarget();
+  const text = target.get().trim();
   if (!text || assistant.busy) return;
   const bullets = await run(text);
   if (bullets === null) return;
-  offerUndo(tracker.state.description);
-  setDescription(bullets);
+  offerUndo(target, target.get());
+  target.set(bullets);
 }
 
 /** Converts dictated text to bullets before it is appended (auto mode). */
@@ -60,14 +63,22 @@ async function run(text: string): Promise<string | null> {
   }
 }
 
-function offerUndo(previous: string) {
+function offerUndo(target: DescriptionTarget, previous: string) {
+  undoTarget = target;
   assistant.undo = previous;
   clearTimeout(undoTimer);
   undoTimer = setTimeout(() => (assistant.undo = null), 15000);
 }
 
 export function undoSummary() {
-  if (assistant.undo === null) return;
-  setDescription(assistant.undo);
+  if (assistant.undo === null || !undoTarget) return;
+  undoTarget.set(assistant.undo);
   assistant.undo = null;
+}
+
+/** Drops a pending undo, e.g. when the editor it belongs to closes. */
+export function clearUndo() {
+  clearTimeout(undoTimer);
+  assistant.undo = null;
+  undoTarget = null;
 }

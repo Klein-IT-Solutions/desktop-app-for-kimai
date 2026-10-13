@@ -384,6 +384,9 @@ func DescribeError(err error) (status, message string) {
 	}
 	var apiErr *kimai.APIError
 	if errors.As(err, &apiErr) {
+		if len(apiErr.Details) > 0 {
+			return StatusError, "Kimai lehnt das ab: " + strings.Join(apiErr.Details, " ")
+		}
 		if apiErr.Message != "" {
 			return StatusError, fmt.Sprintf("Kimai meldet einen Fehler (%d): %s", apiErr.StatusCode, apiErr.Message)
 		}

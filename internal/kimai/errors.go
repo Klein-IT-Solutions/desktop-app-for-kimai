@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // Sentinel errors; test with errors.Is.
@@ -33,9 +34,14 @@ type APIError struct {
 	StatusCode int
 	// Message is the error message reported by Kimai, if any.
 	Message string
+	// Details are validation messages ("The end date must not be earlier …").
+	Details []string
 }
 
 func (e *APIError) Error() string {
+	if len(e.Details) > 0 {
+		return fmt.Sprintf("kimai: HTTP %d: %s", e.StatusCode, strings.Join(e.Details, " "))
+	}
 	if e.Message != "" {
 		return fmt.Sprintf("kimai: HTTP %d: %s", e.StatusCode, e.Message)
 	}

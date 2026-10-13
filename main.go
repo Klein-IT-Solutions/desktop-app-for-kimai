@@ -95,6 +95,7 @@ func main() {
 			application.NewService(app.NewAppService()),
 			application.NewService(settings),
 			application.NewService(tracker),
+			application.NewService(app.NewEntriesService(tracker)),
 			application.NewService(app.NewShellService(shell)),
 			application.NewService(app.NewVoiceService(store, conn, shell)),
 			application.NewService(app.NewAssistantService(store)),

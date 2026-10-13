@@ -147,6 +147,49 @@ func TestIntegrationFullFlow(t *testing.T) {
 	if active, _ = c.ActiveTimesheets(ctx); len(active) != 0 {
 		t.Errorf("still active after stop: %+v", active)
 	}
+
+	// Entries added afterwards: yesterday 08:00–09:30, then moved and deleted.
+	loc := c.location()
+	y := time.Now().In(loc).AddDate(0, 0, -1)
+	day := time.Date(y.Year(), y.Month(), y.Day(), 0, 0, 0, 0, loc)
+	at := func(h, m int) time.Time { return day.Add(time.Duration(h)*time.Hour + time.Duration(m)*time.Minute) }
+	added, err := c.CreateTimesheet(ctx, EntryInput{
+		ProjectID: project.ID, ActivityID: activity.ID, Description: "nachgetragen", Begin: at(8, 0), End: at(9, 30),
+	})
+	if err != nil {
+		t.Fatalf("CreateTimesheet: %v", err)
+	}
+	t.Cleanup(func() { deleteTimesheet(t, c, added.ID) })
+	if added.Running() || added.Duration != 5400 || !added.Begin.Equal(at(8, 0)) {
+		t.Errorf("added = %+v", added)
+	}
+	list, err := c.Timesheets(ctx, day, day.AddDate(0, 0, 1).Add(-time.Second))
+	if err != nil {
+		t.Fatalf("Timesheets: %v", err)
+	}
+	var found *Timesheet
+	for i := range list {
+		if list[i].ID == added.ID {
+			found = &list[i]
+		}
+	}
+	if found == nil || found.Project.Name != project.Name || found.Project.Customer == nil || found.Activity.Name != activity.Name {
+		t.Fatalf("added entry not listed with relations: %+v", list)
+	}
+	moved, err := c.UpdateTimesheet(ctx, added.ID, EntryInput{
+		ProjectID: project.ID, ActivityID: activity.ID, Description: "verschoben", Begin: at(10, 0), End: at(10, 45),
+	})
+	if err != nil || moved.Duration != 2700 || moved.Description != "verschoben" {
+		t.Fatalf("UpdateTimesheet = %+v, %v", moved, err)
+	}
+	_, err = c.CreateTimesheet(ctx, EntryInput{ProjectID: project.ID, ActivityID: activity.ID, Begin: at(12, 0), End: at(11, 0)})
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) || len(apiErr.Details) == 0 {
+		t.Errorf("end before begin: err = %v, want validation details", err)
+	}
+	if err := c.DeleteTimesheet(ctx, added.ID); err != nil {
+		t.Fatalf("DeleteTimesheet: %v", err)
+	}
 }
 
 func TestIntegrationErrors(t *testing.T) {

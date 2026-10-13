@@ -3,6 +3,7 @@
 
 import * as AppService from "./appservice.js";
 import * as AssistantService from "./assistantservice.js";
+import * as EntriesService from "./entriesservice.js";
 import * as SettingsService from "./settingsservice.js";
 import * as ShellService from "./shellservice.js";
 import * as TrackerService from "./trackerservice.js";
@@ -10,6 +11,7 @@ import * as VoiceService from "./voiceservice.js";
 export {
     AppService,
     AssistantService,
+    EntriesService,
     SettingsService,
     ShellService,
     TrackerService,
@@ -22,7 +24,10 @@ export type {
     AssistantSettings,
     AssistantSettingsInput,
     ConnectionResult,
+    DayEntries,
     DownloadProgress,
+    Entry,
+    EntryInput,
     Info,
     ModelStatus,
     Option,

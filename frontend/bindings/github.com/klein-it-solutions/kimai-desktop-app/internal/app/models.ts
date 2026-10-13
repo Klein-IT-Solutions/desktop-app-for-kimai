@@ -78,6 +78,25 @@ export interface ConnectionResult {
 }
 
 /**
+ * DayEntries lists the entries of one day.
+ */
+export interface DayEntries {
+    "date": string;
+    "today": boolean;
+
+    /**
+     * current time (HH:MM) in the Kimai time zone
+     */
+    "now": string;
+    "entries": Entry[] | null;
+
+    /**
+     * seconds
+     */
+    "total": number;
+}
+
+/**
  * DownloadProgress reports a running model download.
  */
 export interface DownloadProgress {
@@ -86,6 +105,54 @@ export interface DownloadProgress {
     "total": number;
     "finished": boolean;
     "error"?: string;
+}
+
+/**
+ * Entry is a timesheet in the entry list and editor. Date and times are in
+ * the Kimai user's time zone.
+ */
+export interface Entry {
+    "id": number;
+
+    /**
+     * 2026-10-13
+     */
+    "date": string;
+
+    /**
+     * 09:00
+     */
+    "begin": string;
+
+    /**
+     * "" while running
+     */
+    "end": string;
+
+    /**
+     * seconds; running entries count until now
+     */
+    "duration": number;
+    "running": boolean;
+    "customer": Selection;
+    "project": Selection;
+    "activity": Selection;
+    "description": string;
+}
+
+/**
+ * EntryInput creates (ID 0) or changes an entry. End may only be empty for
+ * the running entry, which then keeps running.
+ */
+export interface EntryInput {
+    "id": number;
+    "date": string;
+    "begin": string;
+    "end": string;
+    "customer": Selection;
+    "project": Selection;
+    "activity": Selection;
+    "description": string;
 }
 
 /**

@@ -1,15 +1,13 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { slide } from "svelte/transition";
-  import { TrackerService, type Option } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
-  import SelectRow from "../components/SelectRow.svelte";
+  import type { Option } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import SelectionRows from "../components/SelectionRows.svelte";
+  import AssistantNotices from "../components/AssistantNotices.svelte";
   import TimerButton from "../components/TimerButton.svelte";
   import DescriptionField from "../components/DescriptionField.svelte";
-  import Picker from "../components/Picker.svelte";
   import { connection } from "../connection.svelte";
-  import { voice } from "../voice.svelte";
   import { voiceEnabled } from "../voiceSettings.svelte";
-  import { assistant, undoSummary } from "../assistant.svelte";
   import {
     canStart,
     selectActivity,
@@ -20,10 +18,7 @@
     tracker,
   } from "../tracker.svelte";
 
-  let { onOpenSettings }: { onOpenSettings: () => void } = $props();
-
-  type PickerKind = "customer" | "project" | "activity" | null;
-  let picker = $state<PickerKind>(null);
+  let { onOpenSettings, onEditRunning }: { onOpenSettings: () => void; onEditRunning: () => void } = $props();
 
   let now = $state(Date.now());
   const tick = setInterval(() => (now = Date.now()), 250);
@@ -33,49 +28,17 @@
   const connected = $derived(connection.result?.ok ?? false);
   const elapsed = $derived(s.running && s.begin ? Math.max(0, (now - Date.parse(s.begin)) / 1000) : 0);
   const locked = $derived(s.running || tracker.busy);
+  let pickerOpen = $state(false);
 
-  // After a choice, open the next picker – or pick automatically when there is only one option.
-  async function afterCustomer() {
-    const items = (await TrackerService.Projects(s.customer.id, false).catch(() => null))?.items ?? [];
-    if (items.length === 1) {
-      selectProject(items[0]);
-      return afterProject();
-    }
-    picker = "project";
-  }
-
-  async function afterProject() {
-    const items = (await TrackerService.Activities(s.project.id, false).catch(() => null))?.items ?? [];
-    if (items.length === 1) {
-      selectActivity(items[0]);
-      picker = null;
-      return;
-    }
-    picker = s.activity.id ? null : "activity";
-  }
-
-  function onCustomer(o: Option) {
-    const changed = o.id !== s.customer.id;
-    selectCustomer(o);
-    picker = null;
-    if (changed || !s.project.id) afterCustomer();
-  }
-
-  function onProject(o: Option) {
-    const changed = o.id !== s.project.id;
-    selectProject(o);
-    picker = null;
-    if (changed || !s.activity.id) afterProject();
-  }
-
-  function onActivity(o: Option) {
-    selectActivity(o);
-    picker = null;
+  function onSelect(kind: "customer" | "project" | "activity", o: Option) {
+    if (kind === "customer") selectCustomer(o);
+    else if (kind === "project") selectProject(o);
+    else selectActivity(o);
   }
 
   function onKey(e: KeyboardEvent) {
     // Ctrl/Cmd+Enter starts or stops the timer from anywhere in the window.
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !picker) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !pickerOpen) {
       if (s.running || (canStart() && connected)) toggleTimer();
       e.preventDefault();
     }
@@ -113,28 +76,9 @@
 <svelte:window onkeydown={onKey} />
 
 <div class="relative flex h-full flex-col px-4 pt-1 pb-3">
-  <section
-    class="overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_0.5px_var(--hairline)] transition-opacity [&>*+*]:border-t [&>*+*]:border-hairline
-      {s.running ? 'opacity-80' : ''}"
-  >
-    <SelectRow icon="building" label="Kunde" value={s.customer.name} disabled={locked} onclick={() => (picker = "customer")} />
-    <SelectRow
-      icon="folder"
-      label="Projekt"
-      value={s.project.name}
-      placeholder={s.customer.id ? "Auswählen" : "–"}
-      disabled={locked || !s.customer.id}
-      onclick={() => (picker = "project")}
-    />
-    <SelectRow
-      icon="tag"
-      label="Tätigkeit"
-      value={s.activity.name}
-      placeholder={s.project.id ? "Auswählen" : "–"}
-      disabled={locked || !s.project.id}
-      onclick={() => (picker = "activity")}
-    />
-  </section>
+  <div class="transition-opacity {s.running ? 'opacity-80' : ''}">
+    <SelectionRows customer={s.customer} project={s.project} activity={s.activity} disabled={locked} bind:open={pickerOpen} onchange={onSelect} />
+  </div>
 
   <div class="flex flex-1 flex-col items-center justify-center gap-2 py-2">
     <TimerButton
@@ -147,7 +91,9 @@
       {#if tracker.busy}
         {s.running ? "Wird gestoppt …" : "Wird gestartet …"}
       {:else if s.running && s.begin}
-        seit {new Date(s.begin).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
+        <button class="underline-offset-2 hover:text-fg-muted hover:underline" title="Startzeit, Projekt oder Beschreibung ändern" onclick={onEditRunning}>
+          seit {new Date(s.begin).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr ✎
+        </button>
       {:else}
         {hint}
       {/if}
@@ -165,31 +111,7 @@
     </button>
   {/if}
 
-  {#if assistant.error}
-    <button
-      transition:slide={{ duration: 180 }}
-      class="mb-2 rounded-[10px] bg-danger/12 px-3 py-2 text-left text-[12px] leading-snug"
-      onclick={() => (assistant.error = "")}
-    >
-      {assistant.error}
-    </button>
-  {:else if assistant.undo !== null}
-    <div transition:slide={{ duration: 180 }} class="mb-2 flex items-center justify-between rounded-[10px] bg-accent/10 px-3 py-1.5 text-[12px]">
-      <span>In Stichpunkte umgewandelt</span>
-      <button class="font-medium text-accent hover:opacity-75" onclick={undoSummary}>Rückgängig</button>
-    </div>
-  {/if}
-
-  {#if voice.error}
-    <button
-      transition:slide={{ duration: 180 }}
-      class="mb-2 rounded-[10px] bg-warning/15 px-3 py-2 text-left text-[12px] leading-snug"
-      title="Ausblenden"
-      onclick={() => (voice.error = "")}
-    >
-      {voice.error}
-    </button>
-  {/if}
+  <AssistantNotices />
 
   <DescriptionField
     value={s.description}
@@ -206,32 +128,4 @@
     <span class="truncate">{status.text}</span>
   </button>
 
-  {#if picker === "customer"}
-    <Picker
-      title="Kunde"
-      placeholder="Kunde suchen …"
-      selectedId={s.customer.id}
-      load={(r) => TrackerService.Customers(r)}
-      onselect={onCustomer}
-      onclose={() => (picker = null)}
-    />
-  {:else if picker === "project"}
-    <Picker
-      title="Projekt"
-      placeholder="Projekt suchen …"
-      selectedId={s.project.id}
-      load={(r) => TrackerService.Projects(s.customer.id, r)}
-      onselect={onProject}
-      onclose={() => (picker = null)}
-    />
-  {:else if picker === "activity"}
-    <Picker
-      title="Tätigkeit"
-      placeholder="Tätigkeit suchen …"
-      selectedId={s.activity.id}
-      load={(r) => TrackerService.Activities(s.project.id, r)}
-      onselect={onActivity}
-      onclose={() => (picker = null)}
-    />
-  {/if}
 </div>

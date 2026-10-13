@@ -342,3 +342,77 @@ func TestUntrustedCertificate(t *testing.T) {
 		t.Error("certificate errors must not be reported as offline")
 	}
 }
+
+func TestTimesheetsOfDay(t *testing.T) {
+	f, c := newFake(t)
+	f.handle("GET /api/timesheets", 200, `[
+		{"id":1,"begin":"2026-10-13T08:00:00+0200","end":"2026-10-13T09:30:00+0200","duration":5400,
+		 "project":{"id":10,"name":"Website","customer":{"id":1,"name":"ACME"}},"activity":{"id":100,"name":"Dev"}},
+		{"id":2,"begin":"2026-10-13T10:00:00+0200","end":null,"project":{"id":11,"name":"App","customer":{"id":1,"name":"ACME"}},"activity":{"id":101,"name":"Meeting"}}
+	]`)
+	berlin, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Skip("tzdata not available")
+	}
+	c.Location = berlin
+	day := time.Date(2026, 10, 13, 0, 0, 0, 0, berlin)
+	list, err := c.Timesheets(context.Background(), day, day.Add(24*time.Hour-time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 2 || list[0].Project.Customer.Name != "ACME" || list[0].Activity.Name != "Dev" || !list[1].Running() {
+		t.Errorf("list = %+v", list)
+	}
+	q := f.lastReq.URL.Query()
+	if q.Get("begin") != "2026-10-13T00:00:00" || q.Get("end") != "2026-10-13T23:59:59" || q.Get("full") != "true" || q.Get("order") != "ASC" {
+		t.Errorf("query = %v", q)
+	}
+}
+
+func TestCreateUpdateDeleteTimesheet(t *testing.T) {
+	f, c := newFake(t)
+	f.handle("POST /api/timesheets", 200, `{"id":7,"begin":"2026-10-13T08:00:00+0200","end":"2026-10-13T09:00:00+0200","duration":3600,"project":10,"activity":100}`)
+	f.handle("PATCH /api/timesheets/7", 200, `{"id":7,"begin":"2026-10-13T08:15:00+0200","end":null,"project":10,"activity":100}`)
+	f.handle("DELETE /api/timesheets/7", 204, ``)
+	berlin, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Skip("tzdata not available")
+	}
+	c.Location = berlin
+	ctx := context.Background()
+	begin := time.Date(2026, 10, 13, 8, 0, 0, 0, berlin)
+
+	if _, err := c.CreateTimesheet(ctx, EntryInput{ProjectID: 10, ActivityID: 100, Begin: begin}); err == nil {
+		t.Error("create without end should fail")
+	}
+	ts, err := c.CreateTimesheet(ctx, EntryInput{ProjectID: 10, ActivityID: 100, Description: "x", Begin: begin, End: begin.Add(time.Hour)})
+	if err != nil || ts.ID != 7 || ts.Running() {
+		t.Fatalf("create = %+v, %v", ts, err)
+	}
+	if b := f.lastBody; b["begin"] != "2026-10-13T08:00:00" || b["end"] != "2026-10-13T09:00:00" || b["description"] != "x" {
+		t.Errorf("create body = %v", b)
+	}
+
+	// Updating a running entry must not send an end time.
+	if _, err := c.UpdateTimesheet(ctx, 7, EntryInput{ProjectID: 10, ActivityID: 100, Begin: begin.Add(15 * time.Minute)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := f.lastBody["end"]; ok || f.lastBody["begin"] != "2026-10-13T08:15:00" {
+		t.Errorf("update body = %v", f.lastBody)
+	}
+
+	if err := c.DeleteTimesheet(ctx, 7); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestValidationErrorDetails(t *testing.T) {
+	f, c := newFake(t)
+	f.handle("POST /api/timesheets", 400, `{"code":400,"message":"Validation Failed","errors":{"errors":["The end date must not be earlier than the start date."],"children":{"begin":{},"project":{"errors":["This value is not valid."]}}}}`)
+	now := time.Now()
+	_, err := c.CreateTimesheet(context.Background(), EntryInput{ProjectID: 1, ActivityID: 1, Begin: now, End: now.Add(-time.Hour)})
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) || len(apiErr.Details) != 2 || apiErr.Details[1] != "This value is not valid." {
+		t.Fatalf("err = %#v", err)
+	}
+}

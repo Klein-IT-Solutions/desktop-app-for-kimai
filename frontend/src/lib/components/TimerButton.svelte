@@ -27,7 +27,8 @@
     onclick={ontoggle}
   >
     {#if running}
-      <span class="absolute inset-0 animate-[pulse-ring_2.4s_ease-out_infinite] rounded-full border-2 border-danger"></span>
+      <!-- The ring grows beyond the button; it must not catch clicks. -->
+      <span class="pointer-events-none absolute inset-0 animate-[pulse-ring_2.4s_ease-out_infinite] rounded-full border-2 border-danger"></span>
     {/if}
     <span class="transition-transform duration-300 ease-apple {running ? 'scale-100' : 'translate-x-0.5'}">
       <Icon name={running ? "stop" : "play"} size={running ? 26 : 30} />

@@ -21,6 +21,8 @@ Kostenlos und Open Source, entwickelt von **[Klein IT Solutions](https://klein-i
   in der App und umgekehrt.
 - **Beschreibung jederzeit ändern:** Was du während der Arbeit einträgst, wird automatisch in
   Kimai gespeichert.
+- **Nachtragen und korrigieren:** Start vergessen oder lieber abends alles eintragen? Einträge
+  lassen sich nachträglich anlegen, ändern und löschen, mit Diktat und KI-Stichpunkten.
 - **Läuft im Hintergrund:** Symbol im Infobereich mit laufender Zeit, Start/Stopp per
   Tastenkürzel, auf Wunsch Start bei der Anmeldung.
 - **Spracheingabe:** Beschreibung einfach diktieren, wahlweise komplett offline auf deinem
@@ -73,6 +75,8 @@ geben.
 | Zeit starten | Kunde, Projekt und Tätigkeit wählen → grüner Knopf (oder **Strg + Enter**) |
 | Zeit stoppen | Roter Knopf, Symbol im Infobereich oder **Strg + Enter** |
 | Fenster zeigen/verstecken | Tastenkürzel: Windows **Strg + Alt + T**, Linux **Super + Umschalt + T** |
+| Einträge ansehen, nachtragen, ändern | Listen-Symbol oben im Fenster |
+| Startzeit des laufenden Timers ändern | Auf „seit … Uhr“ unter der Zeit klicken |
 | Diktieren | Mikrofon-Knopf gedrückt halten und sprechen, oder einmal klicken zum Starten und nochmal zum Beenden |
 | Diktieren, auch bei verstecktem Fenster | Windows **Strg + Alt + V**, Linux **Super + Umschalt + V** gedrückt halten |
 | Beenden | Symbol im Infobereich → *Beenden* |
@@ -82,6 +86,21 @@ dem Beenden läuft ein gestarteter Timer in Kimai weiter.
 
 Tastenkürzel, Benachrichtigungen und *Beim Anmelden starten* stellst du in den Einstellungen
 unter **Hintergrund** ein.
+
+## Einträge nachtragen und ändern
+
+Über das **Listen-Symbol** oben im Fenster siehst du alle Einträge eines Tages mit Tagessumme.
+Mit den Pfeilen blätterst du zu früheren Tagen.
+
+- **Nachtragen:** **Eintrag nachtragen** antippen, Kunde/Projekt/Tätigkeit und Zeit wählen,
+  fertig. Die Startzeit schließt an den letzten Eintrag des Tages an, das Ende ist „jetzt“.
+- **Ändern oder löschen:** Eintrag antippen.
+- **Start vergessen?** Starte den Timer einfach jetzt und klicke unter der laufenden Zeit auf
+  **„seit … Uhr“**. Dort trägst du ein, wann du wirklich angefangen hast.
+- **Zeiten schnell tippen:** `9` wird zu 09:00, `930` zu 09:30, mit den Pfeiltasten gehst du
+  in 5-Minuten-Schritten. **Strg + Enter** speichert.
+- **Diktieren und ✨ Stichpunkte** funktionieren im Eintrag genauso wie beim Timer, auch wenn
+  nebenher ein Timer läuft.
 
 ## Spracheingabe
 

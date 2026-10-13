@@ -6,9 +6,18 @@
   let {
     title,
     canGoBack = false,
+    showActions = true,
     onBack,
     onSettings,
-  }: { title: string; canGoBack?: boolean; onBack?: () => void; onSettings?: () => void } = $props();
+    onEntries,
+  }: {
+    title: string;
+    canGoBack?: boolean;
+    showActions?: boolean;
+    onBack?: () => void;
+    onSettings?: () => void;
+    onEntries?: () => void;
+  } = $props();
 
   const controls = platform.controls;
   const controlsLeft = controls.side === "left";
@@ -30,7 +39,15 @@
       >
         Fertig
       </button>
-    {:else}
+    {:else if showActions}
+      <button
+        class="grid size-7 place-items-center rounded-md text-fg-muted transition-colors hover:bg-field-hover hover:text-fg"
+        aria-label="Einträge"
+        title="Einträge ansehen und nachtragen"
+        onclick={onEntries}
+      >
+        <Icon name="list" size={16} />
+      </button>
       <button
         class="grid size-7 place-items-center rounded-md text-fg-muted transition-colors hover:bg-field-hover hover:text-fg"
         aria-label="Einstellungen"
