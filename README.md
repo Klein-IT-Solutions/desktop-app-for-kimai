@@ -8,14 +8,12 @@ built with Go, [Wails v3](https://v3.wails.io), Svelte, TypeScript and Tailwind 
 Developed and maintained by **[Klein IT Solutions](https://klein-it.solutions)**.
 <br clear="left">
 
-> **Status:** early development (step 5 of 6 – tracking, background operation and voice
-> input work). Packaging follows next, see [Roadmap](#roadmap).
+> **Status:** early release for Linux (Ubuntu 24.04+, X11 and Wayland). macOS and Windows
+> are planned, see [Roadmap](#roadmap).
 
 | Light | Dark |
 | ----- | ---- |
 | ![Light mode](docs/screenshots/light.png) | ![Dark mode](docs/screenshots/dark.png) |
-
-<sub>Preliminary screenshots (step 1, demo mode) – will be replaced once the Kimai flow is in place.</sub>
 
 ## Features
 
@@ -173,8 +171,8 @@ Without a scheme, `https://` is assumed (`http://` for `localhost`).
   to blur what is *behind* a window, so the frosted look is approximated with a tinted
   surface and subtle grain. Without a compositor (rare on X11) the transparent margin
   appears dark.
-- **Wayland vs. X11:** Both are supported. Wayland restrictions for the global hotkey
-  are documented together with step 4.
+- **Wayland vs. X11:** Both are supported. Wayland restricts global hotkeys, see
+  [Background operation](#background-operation).
 
 ## Background operation
 
@@ -253,6 +251,7 @@ restricted networks: `KIMAI_TRACKER_LLAMA_URL` (llama.cpp releases) and
 
 ```
 .
+├── .github/workflows/      # CI and release builds
 ├── main.go                 # Wails application & window setup
 ├── internal/
 │   ├── app/                # Services exposed to the frontend
@@ -276,6 +275,11 @@ restricted networks: `KIMAI_TRACKER_LLAMA_URL` (llama.cpp releases) and
 
 See [docs/architecture.md](docs/architecture.md) for technical decisions.
 
+## Contributing
+
+Bug reports, ideas and pull requests are welcome – see [CONTRIBUTING.md](CONTRIBUTING.md).
+Please report security issues privately as described in [SECURITY.md](SECURITY.md).
+
 ## Roadmap
 
 1. ✅ Wails shell with frameless, styled window
@@ -283,7 +287,8 @@ See [docs/architecture.md](docs/architecture.md) for technical decisions.
 3. ✅ Customer/project/activity flow and start/stop
 4. ✅ Tray, global hotkey, background operation
 5. ✅ Voice input
-6. ⏳ Packaging (.deb, AppImage) and CI; later macOS/Windows
+6. ✅ Packaging (.deb, AppImage), CI and versioned releases
+7. ⏳ macOS and Windows builds
 
 ## License
 

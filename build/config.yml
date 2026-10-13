@@ -9,7 +9,7 @@ info:
   productName: "Kimai Tracker" # The name of the application
   productIdentifier: "solutions.klein-it.kimai-tracker" # The unique product identifier
   description: "Desktop time tracking for Kimai" # The application description
-  copyright: "(c) 2026, Kimai Tracker contributors" # Copyright text
+  copyright: "(c) 2026, Klein IT Solutions and the Kimai Tracker contributors" # Copyright text
   comments: "Open-source Kimai time tracker" # Comments
   version: "0.1.0" # The application version
   # cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
@@ -53,18 +53,5 @@ dev_mode:
       type: primary
       exit_policy: shutdown
 
-# File Associations
-# More information at: https://v3.wails.io/noit/done/yet
+# File associations (none)
 fileAssociations:
-#  - ext: wails
-#    name: Wails
-#    description: Wails Application File
-#    iconName: wailsFileIcon
-#    role: Editor
-#  - ext: jpg
-#    name: JPEG
-#    description: Image File
-#    iconName: jpegFileIcon
-#    role: Editor
-#    mimeType: image/jpeg  # (optional)
-
