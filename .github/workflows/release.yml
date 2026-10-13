@@ -70,10 +70,10 @@ jobs:
           if ! echo "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
             echo "::error::Tag $tag is not a version like v1.2.3"; exit 1
           fi
-          if [ "$GITHUB_EVENT_NAME" != "push" ]; then
-            if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
-              echo "::error::Tag $tag already exists"; exit 1
-            fi
+          if [ "$GITHUB_EVENT_NAME" != "push" ] && git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            # Existing version: build that tag again (e.g. to add missing files).
+            echo "::notice::Tag $tag already exists – rebuilding it"
+          elif [ "$GITHUB_EVENT_NAME" != "push" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git tag -a "$tag" -m "Kimai Tracker $tag"
@@ -225,6 +225,11 @@ jobs:
 
           Prüfsummen: \`SHA256SUMS\`.
           NOTES
+          # A release created by hand (or an earlier run) only gets the files.
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+            exit 0
+          fi
           prerelease=""
           case "$VERSION" in *-*) prerelease="--prerelease" ;; esac
           gh release create "$TAG" dist/* \
