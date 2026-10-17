@@ -32,6 +32,7 @@ export type {
     ModelStatus,
     Option,
     OptionList,
+    PendingStatus,
     SaveResult,
     Selection,
     Settings,
