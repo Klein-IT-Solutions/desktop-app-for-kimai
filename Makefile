@@ -40,6 +40,11 @@ ifeq ($(OS),Windows_NT)
 WHISPER_CMAKE_ARGS := -G Ninja
 endif
 
+# macOS: CPU build against Accelerate (no Metal/BLAS libraries to link).
+ifeq ($(shell uname -s),Darwin)
+WHISPER_CMAKE_ARGS := -DGGML_METAL=OFF -DGGML_BLAS=OFF -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
+endif
+
 .PHONY: help deps check-wails whisper dev build run test test-go test-integration check-frontend lint package version clean kimai-up kimai-down
 
 help: ## Show available targets
@@ -100,9 +105,11 @@ lint: whisper ## go vet + gofmt check
 	go vet ./internal/...
 	@test -z "$$(gofmt -l $$(git ls-files --cached --others --exclude-standard "*.go"))" || (echo "gofmt needed:"; gofmt -l $$(git ls-files --cached --others --exclude-standard "*.go"); exit 1)
 
-package: check-wails whisper ## Build packages into ./bin (Linux: .deb + AppImage, Windows: installer)
+package: check-wails whisper ## Build packages into ./bin (Linux: .deb + AppImage, Windows: installer, macOS: .dmg)
 ifeq ($(OS),Windows_NT)
 	$(WAILS) task windows:package VERSION=$(VERSION)
+else ifeq ($(shell uname -s),Darwin)
+	$(WAILS) task darwin:package:dmg VERSION=$(VERSION)
 else
 	$(WAILS) task linux:create:deb EXTRA_TAGS=$(TAGS) VERSION=$(VERSION)
 	$(WAILS) task linux:create:appimage EXTRA_TAGS=$(TAGS) VERSION=$(VERSION)

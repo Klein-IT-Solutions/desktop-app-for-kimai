@@ -54,7 +54,7 @@ Die aktuelle Version findest du unter
 | **Ubuntu 24.04+, Debian 13+** | `tracker-for-kimai_…_amd64.deb` | Doppelklick oder `sudo apt install ./tracker-for-kimai_…_amd64.deb` |
 | **Andere Linux-Systeme** | `Tracker-for-Kimai-…-x86_64.AppImage` | Rechtsklick → *Eigenschaften* → *Als Programm ausführen* erlauben, dann starten |
 
-macOS folgt später.
+**macOS** (ab Version 1.1.0, Apple Silicon, ab macOS 12): `Tracker-for-Kimai-…-macos-arm64.dmg`. Die App ist noch nicht signiert: beim ersten Start Rechtsklick → *Öffnen*. Globale Tastenkürzel und *Beim Anmelden starten* gibt es unter macOS noch nicht.
 
 > **Windows-Hinweis:** Die App ist noch nicht digital signiert. Beim ersten Start zeigt Windows
 > daher eventuell *„Der Computer wurde durch Windows geschützt“*. Klicke auf

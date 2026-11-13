@@ -192,8 +192,55 @@ jobs:
           name: windows
           path: dist/*
 
+  macos:
+    needs: version
+    runs-on: macos-14 # Apple Silicon
+    # macOS is new and not yet verified on real hardware: a failure here must
+    # not block the Linux and Windows release.
+    continue-on-error: true
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Tools and frontend dependencies
+        run: |
+          brew install cmake
+          make deps
+
+      - name: Test
+        run: go test ./internal/...
+
+      - name: Build .dmg
+        run: make package VERSION="$VERSION"
+
+      - name: Collect artifacts
+        run: |
+          mkdir dist
+          cp bin/*.dmg "dist/Tracker-for-Kimai-${VERSION}-macos-arm64.dmg"
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: dist/*
+
   release:
-    needs: [version, linux, windows]
+    needs: [version, linux, windows, macos]
+    if: ${{ !cancelled() && needs.linux.result == 'success' && needs.windows.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -225,6 +272,9 @@ jobs:
 
           Prüfsummen: \`SHA256SUMS\`.
           NOTES
+          if ls dist/*.dmg > /dev/null 2>&1; then
+            printf '\n**macOS 12+ (Apple Silicon):** `Tracker-for-Kimai-%s-macos-arm64.dmg` – App in *Programme* ziehen, beim ersten Start Rechtsklick → *Öffnen* (nicht signiert, noch nicht auf echter Hardware getestet).\n' "$VERSION" >> notes.md
+          fi
           # A release created by hand (or an earlier run) only gets the files.
           if gh release view "$TAG" > /dev/null 2>&1; then
             gh release upload "$TAG" dist/* --clobber
