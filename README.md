@@ -60,6 +60,12 @@ macOS folgt später.
 > daher eventuell *„Der Computer wurde durch Windows geschützt“*. Klicke auf
 > **Weitere Informationen → Trotzdem ausführen**.
 
+> **Update von Version 0.x:** Mit 1.0.0 wurde die App von „Kimai Tracker“ in „Tracker for Kimai“
+> umbenannt (Programm, Paket und Ordner). Einstellungen, Token und heruntergeladene Modelle
+> werden beim ersten Start automatisch übernommen. Deinstalliere die alte Version danach
+> (Windows: *Kimai Tracker*, Ubuntu: `sudo apt remove kimai-tracker`) und schalte *Beim Anmelden
+> starten* bei Bedarf neu ein.
+
 ## Einrichten in zwei Minuten
 
 Du brauchst die Adresse deines Kimai und einen **API-Token**. Der Token ist ein persönlicher

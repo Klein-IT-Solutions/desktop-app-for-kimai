@@ -17,7 +17,7 @@
         PackageDisplayName="Tracker for Kimai"
         PublisherName="CN=Klein IT Solutions"
         PublisherDisplayName="Klein IT Solutions"
-        Version="0.1.0.0"
+        Version="1.0.0.0"
         PackageDescription="Minimalist desktop time tracker for Kimai">
         <Capabilities>
             <Capability Name="runFullTrust" />

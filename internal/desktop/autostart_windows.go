@@ -14,7 +14,10 @@ import (
 // the tray (--hidden).
 const (
 	runKey   = `Software\Microsoft\Windows\CurrentVersion\Run`
-	runValue = "Kimai Tracker"
+	runValue = "Tracker for Kimai"
+
+	// legacyRunValue was used before the rename to "Tracker for Kimai".
+	legacyRunValue = "Kimai Tracker"
 )
 
 // AutostartEnabled reports whether the Run entry exists.
@@ -49,4 +52,19 @@ func SetAutostart(enabled bool) error {
 		exe = resolved
 	}
 	return k.SetStringValue(runValue, `"`+exe+`" --hidden`)
+}
+
+// MigrateAutostart replaces the autostart entry of versions before 1.0.0
+// (value "Kimai Tracker") with the current one.
+func MigrateAutostart() {
+	k, err := registry.OpenKey(registry.CURRENT_USER, runKey, registry.QUERY_VALUE|registry.SET_VALUE)
+	if err != nil {
+		return
+	}
+	defer k.Close()
+	if _, _, err := k.GetStringValue(legacyRunValue); err != nil {
+		return
+	}
+	_ = k.DeleteValue(legacyRunValue)
+	_ = SetAutostart(true)
 }

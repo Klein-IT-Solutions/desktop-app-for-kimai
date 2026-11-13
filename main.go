@@ -91,6 +91,7 @@ func main() {
 	} else {
 		config.MigrateLegacy("")
 	}
+	desktop.MigrateAutostart()
 
 	var mainWindow *application.WebviewWindow
 

@@ -13,7 +13,7 @@ import (
 )
 
 // Version is overridden at build time via -ldflags "-X .../internal/app.Version=...".
-var Version = "0.1.0-dev"
+var Version = "1.0.0-dev"
 
 // Info describes the running application and its environment.
 type Info struct {

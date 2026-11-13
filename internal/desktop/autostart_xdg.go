@@ -102,3 +102,21 @@ func desktopExecQuote(s string) string {
 	r := strings.NewReplacer(`\`, `\\\\`, `"`, `\"`, "`", "\\`", `$`, `\$`)
 	return `"` + r.Replace(s) + `"`
 }
+
+// MigrateAutostart replaces the autostart entry of versions before 1.0.0
+// (kimai-tracker.desktop) with the current one.
+func MigrateAutostart() {
+	if runtime.GOOS != "linux" {
+		return
+	}
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return
+	}
+	legacy := filepath.Join(dir, "autostart", "kimai-tracker.desktop")
+	if _, err := os.Stat(legacy); err != nil {
+		return
+	}
+	_ = os.Remove(legacy)
+	_ = SetAutostart(true)
+}

@@ -114,7 +114,8 @@ Section "uninstall"
 
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
-    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Kimai Tracker" # "Start at login"
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Tracker for Kimai" # "Start at login"
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Kimai Tracker" # before 1.0.0
 
     !insertmacro wails.unassociateFiles
     !insertmacro wails.unassociateCustomProtocols
