@@ -1,5 +1,5 @@
 import { Events } from "@wailsio/runtime";
-import { AppService } from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+import { AppService } from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
 
 function apply(dark: boolean) {
   document.documentElement.classList.toggle("dark", dark);

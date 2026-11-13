@@ -3,7 +3,7 @@
 // On X11 the key is grabbed on the root window. On Wayland, where clients
 // cannot grab keys, the XDG GlobalShortcuts portal is used (KDE Plasma,
 // GNOME 48+); the desktop asks the user to confirm the shortcut. Where
-// neither works, users can bind `kimai-tracker --toggle` in their desktop's
+// neither works, users can bind `tracker-for-kimai --toggle` in their desktop's
 // keyboard settings instead.
 package hotkey
 

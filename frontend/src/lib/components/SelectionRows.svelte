@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TrackerService, type Option, type Selection } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import { TrackerService, type Option, type Selection } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import SelectRow from "./SelectRow.svelte";
   import Picker from "./Picker.svelte";
 

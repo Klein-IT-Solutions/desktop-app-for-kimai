@@ -8,7 +8,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/kimai"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/kimai"
 )
 
 // Pending returns how many entries wait to be sent to Kimai.

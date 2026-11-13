@@ -1,8 +1,13 @@
-# Kimai Tracker
+# Tracker for Kimai
 
-**Zeiterfassung für [Kimai](https://www.kimai.org) direkt auf dem Desktop:** Kunde, Projekt und
+**Inoffizieller Desktop-Tracker für [Kimai](https://www.kimai.org):** Kunde, Projekt und
 Tätigkeit wählen, Start drücken, fertig. Die Zeit läuft in deinem Kimai, die App ist nur der
 schnellste Weg dorthin.
+
+> **Hinweis:** Tracker for Kimai ist ein unabhängiges Community-Projekt von Klein IT Solutions.
+> Es ist **keine offizielle App von Kimai** und steht in keiner Verbindung zum Kimai-Projekt oder
+> dessen Betreibern. „Kimai“ ist eine Marke der jeweiligen Rechteinhaber und wird hier nur
+> genannt, um zu beschreiben, mit welcher Software die App zusammenarbeitet.
 
 <a href="https://klein-it.solutions"><img src="docs/brand/klein-it-solutions.png" alt="Klein IT Solutions" width="40" align="left"></a>
 
@@ -11,7 +16,7 @@ Kostenlos und Open Source, entwickelt von **[Klein IT Solutions](https://klein-i
 
 | Hell | Dunkel |
 | ---- | ------ |
-| ![Kimai Tracker im hellen Design](docs/screenshots/light.png) | ![Kimai Tracker im dunklen Design mit laufendem Timer](docs/screenshots/dark.png) |
+| ![Tracker for Kimai im hellen Design](docs/screenshots/light.png) | ![Tracker for Kimai im dunklen Design mit laufendem Timer](docs/screenshots/dark.png) |
 
 ## Was die App kann
 
@@ -40,14 +45,14 @@ Kostenlos und Open Source, entwickelt von **[Klein IT Solutions](https://klein-i
 ## Download
 
 Die aktuelle Version findest du unter
-**[Releases](https://github.com/klein-it-solutions/kimai-desktop-app/releases/latest)**.
+**[Releases](https://github.com/klein-it-solutions/desktop-app-for-kimai/releases/latest)**.
 
 | System | Datei | Installation |
 | ------ | ----- | ------------ |
 | **Windows 10 / 11** | `…-windows-x64-setup.exe` | Doppelklick, keine Administratorrechte nötig |
 | | `…-windows-x64-portable.exe` | Ohne Installation, einfach starten |
-| **Ubuntu 24.04+, Debian 13+** | `kimai-tracker_…_amd64.deb` | Doppelklick oder `sudo apt install ./kimai-tracker_…_amd64.deb` |
-| **Andere Linux-Systeme** | `Kimai-Tracker-…-x86_64.AppImage` | Rechtsklick → *Eigenschaften* → *Als Programm ausführen* erlauben, dann starten |
+| **Ubuntu 24.04+, Debian 13+** | `tracker-for-kimai_…_amd64.deb` | Doppelklick oder `sudo apt install ./tracker-for-kimai_…_amd64.deb` |
+| **Andere Linux-Systeme** | `Tracker-for-Kimai-…-x86_64.AppImage` | Rechtsklick → *Eigenschaften* → *Als Programm ausführen* erlauben, dann starten |
 
 macOS folgt später.
 
@@ -61,9 +66,9 @@ Du brauchst die Adresse deines Kimai und einen **API-Token**. Der Token ist ein 
 Schlüssel, mit dem die App in deinem Namen Zeiten erfassen darf.
 
 1. **Token in Kimai erstellen:** In Kimai anmelden → oben rechts auf dein Profilbild →
-   **API-Zugang** → neuen Token anlegen (Name z. B. „Kimai Tracker“) → Token kopieren.
+   **API-Zugang** → neuen Token anlegen (Name z. B. „Tracker for Kimai“) → Token kopieren.
    Er wird nur einmal angezeigt.
-2. **In der App eintragen:** Kimai Tracker öffnen → Zahnrad oben → bei *Server* die Adresse
+2. **In der App eintragen:** Tracker for Kimai öffnen → Zahnrad oben → bei *Server* die Adresse
    deines Kimai (z. B. `kimai.firma.de`) und bei *API-Token* den kopierten Token einfügen.
 3. **Verbindung testen** und **Speichern** klicken. Unten im Fenster erscheint ein grüner
    Punkt mit deinem Namen.
@@ -163,8 +168,8 @@ sie vorinstalliert. Ohne Infobereich wird das Fenster beim Schließen minimiert 
 Wird es schon von einem anderen Programm benutzt, sagen die Einstellungen das. Wähle dann
 ein anderes Kürzel. Unter **Wayland** fragt dein Desktop beim ersten Mal nach einer
 Bestätigung. Ältere Wayland-Desktops erlauben gar keine globalen Kürzel. Lege dann in den
-Systemeinstellungen ein eigenes Tastenkürzel an, das `kimai-tracker --toggle` (Fenster) oder
-`kimai-tracker --timer` (Start/Stopp) ausführt. Die Einstellungen zeigen den passenden Befehl
+Systemeinstellungen ein eigenes Tastenkürzel an, das `tracker-for-kimai --toggle` (Fenster) oder
+`tracker-for-kimai --timer` (Start/Stopp) ausführt. Die Einstellungen zeigen den passenden Befehl
 zum Kopieren an.
 
 **Der Schlüsselbund ist nicht verfügbar (Linux).**
@@ -175,14 +180,14 @@ ihn später in den Schlüsselbund verschieben.
 Einstellungen → ganz unten unter *Info*.
 
 **Wie deinstalliere ich die App?**
-Windows: *Einstellungen → Apps → Kimai Tracker → Deinstallieren*. Ubuntu:
-`sudo apt remove kimai-tracker`. AppImage: Datei löschen. Die Einstellungen bleiben erhalten.
-Unter Windows liegen sie in `%APPDATA%\kimai-tracker`, unter Linux in
-`~/.config/kimai-tracker`.
+Windows: *Einstellungen → Apps → Tracker for Kimai → Deinstallieren*. Ubuntu:
+`sudo apt remove tracker-for-kimai`. AppImage: Datei löschen. Die Einstellungen bleiben erhalten.
+Unter Windows liegen sie in `%APPDATA%\solutions.klein-it.tracker-for-kimai`, unter Linux in
+`~/.config/solutions.klein-it.tracker-for-kimai`.
 
 ## Fehler melden und mitmachen
 
-Fehler und Ideen bitte als [Issue](https://github.com/klein-it-solutions/kimai-desktop-app/issues)
+Fehler und Ideen bitte als [Issue](https://github.com/klein-it-solutions/desktop-app-for-kimai/issues)
 melden, am besten mit Version und Betriebssystem. Sicherheitslücken bitte vertraulich melden,
 siehe [SECURITY.md](SECURITY.md).
 
@@ -191,9 +196,12 @@ Entwickler finden Bauanleitung, Tests und Release-Ablauf in
 
 ## Lizenz
 
-[MIT](LICENSE) © Klein IT Solutions und die Kimai-Tracker-Mitwirkenden.
+[MIT](LICENSE) © Klein IT Solutions und die Tracker-for-Kimai-Mitwirkenden.
 
-Kimai Tracker ist ein unabhängiges Projekt und kein offizielles Produkt des Kimai-Projekts.
+Tracker for Kimai ist ein unabhängiges Projekt und **kein offizielles Produkt des Kimai-Projekts**.
+Es wird weder von Kimai entwickelt noch unterstützt oder empfohlen. Für Fragen zur App bitte die
+[Issues](https://github.com/klein-it-solutions/desktop-app-for-kimai/issues) hier nutzen, nicht den
+Kimai-Support.
 
 ---
 

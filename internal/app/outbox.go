@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/kimai"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/kimai"
 )
 
 // EventPendingChanged is emitted with a PendingStatus whenever the number of
@@ -60,7 +60,7 @@ type outboxFile struct {
 	Entries []PendingEntry `json:"entries"`
 }
 
-// Outbox keeps entries saved offline in ~/.config/kimai-tracker/pending.json.
+// Outbox keeps entries saved offline in ~/.config/solutions.klein-it.tracker-for-kimai/pending.json.
 // Unlike the list cache it is never discarded: entries of another Kimai URL
 // are kept and synced when that URL is configured again.
 type Outbox struct {

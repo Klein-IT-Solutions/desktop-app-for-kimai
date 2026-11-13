@@ -105,7 +105,7 @@ func TestIntegrationFullFlow(t *testing.T) {
 	// Start
 	begin := time.Now().Add(-5 * time.Minute).Truncate(time.Second)
 	started, err := c.StartTimesheet(ctx, StartInput{
-		ProjectID: project.ID, ActivityID: activity.ID, Description: "kimai-tracker integration test", Begin: begin,
+		ProjectID: project.ID, ActivityID: activity.ID, Description: "tracker-for-kimai integration test", Begin: begin,
 	})
 	if err != nil {
 		t.Fatalf("StartTimesheet: %v", err)

@@ -4,11 +4,11 @@
         <key>CFBundlePackageType</key>
             <string>APPL</string>
         <key>CFBundleName</key>
-            <string>Kimai Tracker</string>
+            <string>Tracker for Kimai</string>
         <key>CFBundleExecutable</key>
-            <string>kimai-tracker</string>
+            <string>tracker-for-kimai</string>
         <key>CFBundleIdentifier</key>
-            <string>solutions.klein-it.kimai-tracker</string>
+            <string>solutions.klein-it.tracker-for-kimai</string>
         <key>CFBundleVersion</key>
             <string>0.1.0</string>
         <key>CFBundleGetInfoString</key>
@@ -22,7 +22,7 @@
         <key>NSHighResolutionCapable</key>
             <string>true</string>
         <key>NSHumanReadableCopyright</key>
-            <string>(c) 2026, Klein IT Solutions and the Kimai Tracker contributors</string>
+            <string>(c) 2026, Klein IT Solutions and the Tracker for Kimai contributors</string>
         <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSAllowsLocalNetworking</key>

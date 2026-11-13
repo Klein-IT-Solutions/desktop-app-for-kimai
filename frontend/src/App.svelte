@@ -2,7 +2,7 @@
   import { Events } from "@wailsio/runtime";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
-  import { EntriesService, type DayEntries, type Entry } from "../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import { EntriesService, type DayEntries, type Entry } from "../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import TitleBar from "./lib/components/TitleBar.svelte";
   import TrackerView from "./lib/views/TrackerView.svelte";
   import SettingsView from "./lib/views/SettingsView.svelte";
@@ -55,7 +55,7 @@
     editing = null;
   }
 
-  const titles: Record<View, string> = { tracker: "Kimai Tracker", settings: "Einstellungen", entries: "Einträge", entry: "Eintrag" };
+  const titles: Record<View, string> = { tracker: "Tracker for Kimai", settings: "Einstellungen", entries: "Einträge", entry: "Eintrag" };
   const title = $derived(view === "entry" && editing && !editing.entry ? "Eintrag nachtragen" : titles[view]);
 
   const slide = (d: 1 | -1) => ({ x: 40 * d, duration: 260, easing: cubicOut, opacity: 0 });

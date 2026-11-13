@@ -10,8 +10,8 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/kimai"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/kimai"
 )
 
 // EventConnectionChanged is emitted with a ConnectionResult whenever the
@@ -138,7 +138,7 @@ func (c *Connection) setLocation(loc *time.Location) {
 }
 
 func newClient(url, token string) (*kimai.Client, error) {
-	return kimai.New(url, token, kimai.WithUserAgent("kimai-tracker/"+Version))
+	return kimai.New(url, token, kimai.WithUserAgent("tracker-for-kimai/"+Version))
 }
 
 // SettingsService manages configuration, the API token and the connection check.

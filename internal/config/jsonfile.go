@@ -52,7 +52,7 @@ func SaveJSON(path string, v any) error {
 	return os.Rename(tmp.Name(), path)
 }
 
-// DefaultCachePath returns ~/.cache/kimai-tracker/<name> (honouring XDG_CACHE_HOME).
+// DefaultCachePath returns ~/.cache/solutions.klein-it.tracker-for-kimai/<name> (honouring XDG_CACHE_HOME).
 func DefaultCachePath(name string) (string, error) {
 	dir, err := os.UserCacheDir()
 	if err != nil {
@@ -61,7 +61,7 @@ func DefaultCachePath(name string) (string, error) {
 	return filepath.Join(dir, AppDirName, name), nil
 }
 
-// DefaultStatePath returns ~/.config/kimai-tracker/<name>.
+// DefaultStatePath returns ~/.config/solutions.klein-it.tracker-for-kimai/<name>.
 func DefaultStatePath(name string) (string, error) {
 	p, err := DefaultPath()
 	if err != nil {

@@ -36,8 +36,8 @@ type WindowControls struct {
 }
 
 // StyleOverrideEnv forces a style for development and screenshots,
-// e.g. KIMAI_TRACKER_WINDOW_STYLE=windows.
-const StyleOverrideEnv = "KIMAI_TRACKER_WINDOW_STYLE"
+// e.g. TRACKER_FOR_KIMAI_WINDOW_STYLE=windows.
+const StyleOverrideEnv = "TRACKER_FOR_KIMAI_WINDOW_STYLE"
 
 // DetectWindowControls returns the window controls for the running platform.
 // On Linux it honours the desktop's button layout (GNOME "button-layout").

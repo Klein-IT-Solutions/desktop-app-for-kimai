@@ -10,8 +10,8 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/llm"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/llm"
 )
 
 // EventAssistantDownload reports model/runtime download progress (AssistantDownload).
@@ -127,7 +127,7 @@ func (a *AssistantService) DownloadModel(id string) error {
 		return err
 	}
 	url := m.URL
-	if mirror := os.Getenv("KIMAI_TRACKER_LLM_MODEL_URL"); mirror != "" {
+	if mirror := os.Getenv("TRACKER_FOR_KIMAI_LLM_MODEL_URL"); mirror != "" {
 		url = strings.TrimRight(mirror, "/") + "/" + m.File
 	}
 	return a.runDownload("model", id, func(ctx context.Context, progress func(int64, int64)) error {
@@ -141,7 +141,7 @@ func (a *AssistantService) DownloadModel(id string) error {
 // InstallRuntime downloads llama.cpp for this platform in the background.
 func (a *AssistantService) InstallRuntime() error {
 	src := llm.OfficialSource
-	if mirror := os.Getenv("KIMAI_TRACKER_LLAMA_URL"); mirror != "" {
+	if mirror := os.Getenv("TRACKER_FOR_KIMAI_LLAMA_URL"); mirror != "" {
 		src = llm.MirrorSource(mirror)
 	}
 	return a.runDownload("runtime", "llama.cpp", func(ctx context.Context, progress func(int64, int64)) error {

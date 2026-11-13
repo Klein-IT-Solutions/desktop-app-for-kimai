@@ -6,7 +6,7 @@
     type Entry,
     type Option,
     type Selection,
-  } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import SelectionRows from "../components/SelectionRows.svelte";
   import AssistantNotices from "../components/AssistantNotices.svelte";
   import DescriptionField from "../components/DescriptionField.svelte";

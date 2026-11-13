@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping to improve Kimai Tracker!
+Thanks for helping to improve Tracker for Kimai, an unofficial, community-made desktop tracker for [Kimai](https://www.kimai.org) (not affiliated with the Kimai project)!
 
 ## Issues
 

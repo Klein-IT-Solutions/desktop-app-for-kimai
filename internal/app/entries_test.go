@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
 )
 
 // fakeEntries is an in-memory Kimai timesheet store for the entries service.

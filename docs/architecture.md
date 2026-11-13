@@ -2,7 +2,7 @@
 
 ## Wails v3 instead of v2
 
-Kimai Tracker is a tray-first application: it lives in the background, shows the
+Tracker for Kimai (an unofficial, independent client for Kimai) is a tray-first application: it lives in the background, shows the
 running timer in the tray menu and is toggled via hotkey. Wails v3 ships a native,
 cross-platform system tray (`app.SystemTray`), multi-window support and window
 hooks (e.g. cancel *close* → hide). Wails v2 has no tray API; it would need a
@@ -54,7 +54,7 @@ it in v3.1.
   `XDG_CURRENT_DESKTOP`). The side, order and visible buttons come from the desktop's
   `org.gnome.desktop.wm.preferences button-layout` (XDG portal, fallback `gsettings`),
   so the GNOME default `appmenu:close` shows only a close button. Settings/Done sit on
-  the opposite side. `KIMAI_TRACKER_WINDOW_STYLE=mac|windows|gnome|kde` forces a style
+  the opposite side. `TRACKER_FOR_KIMAI_WINDOW_STYLE=mac|windows|gnome|kde` forces a style
   for development. The corner radius follows the platform too.
 - Single instance: a second launch focuses the running window. This is also the
   basis for the Wayland hotkey fallback (bind a desktop shortcut to the binary).
@@ -73,11 +73,11 @@ into `frontend/bindings` by `wails3 generate bindings` (run automatically during
 
 ## Configuration and secrets
 
-- `internal/config` stores non-secret settings in `~/.config/kimai-tracker/config.json`
+- `internal/config` stores non-secret settings in `~/.config/solutions.klein-it.tracker-for-kimai/config.json`
   (honours `XDG_CONFIG_HOME`), written atomically with mode `0600`. A corrupt file is
   moved to `config.json.broken` and the app starts with defaults.
 - The API token lives in the system keyring via `zalando/go-keyring`
-  (service `kimai-tracker`, key `kimai-api-token`). The token is never sent back to
+  (service `tracker-for-kimai`, key `kimai-api-token`). The token is never sent back to
   the frontend; the UI only learns whether one is stored.
 - go-keyring ignores a dismissed Secret Service prompt and reports success without
   storing anything. `config.Keyring.Set` therefore reads the value back and fails
@@ -116,10 +116,10 @@ full start → update → stop flow against a real instance (`make kimai-up`).
 
 ## Tracking data
 
-- `Catalog` caches customer/project/activity lists in `~/.cache/kimai-tracker/cache.json`
+- `Catalog` caches customer/project/activity lists in `~/.cache/solutions.klein-it.tracker-for-kimai/cache.json`
   (fresh for 10 minutes, used as stale fallback when offline) and keeps recently used
   entries plus the last selection and draft description in
-  `~/.config/kimai-tracker/state.json`. Both are bound to the Kimai URL; switching
+  `~/.config/solutions.klein-it.tracker-for-kimai/state.json`. Both are bound to the Kimai URL; switching
   instances starts clean.
 - Lists show recently used entries first (most recent first, max. 5), the rest
   alphabetically.
@@ -130,7 +130,7 @@ full start → update → stop flow against a real instance (`make kimai-up`).
 
 - When Kimai cannot be reached (network error, timeout, HTTP 502/503/504 from a proxy, or
   the last connection check said *offline*), changes are kept in an outbox instead of
-  failing: `~/.config/kimai-tracker/pending.json` (`app.Outbox`, mode 0600). Each entry
+  failing: `~/.config/solutions.klein-it.tracker-for-kimai/pending.json` (`app.Outbox`, mode 0600). Each entry
   stores absolute begin/end times and the Kimai URL it belongs to; entries of another URL
   are kept, not discarded, and sent when that URL is configured again.
 - What is queued: new entries, changes of existing entries (keyed by Kimai ID, a later
@@ -163,7 +163,7 @@ full start → update → stop flow against a real instance (`make kimai-up`).
   running time at minute resolution (refreshed every 5 s while running).
 - Hotkey (`internal/hotkey`): X11 key grab via `jezek/xgb` (pure Go, also grabbed with
   Caps/Num Lock variants); on Wayland the XDG GlobalShortcuts portal. Fallback for all
-  desktops: `kimai-tracker --toggle` / `--timer`, forwarded to the running instance via
+  desktops: `tracker-for-kimai --toggle` / `--timer`, forwarded to the running instance via
   Wails single-instance.
 - Notifications: Wails notifications service (freedesktop on Linux), sent on every
   running/stopped transition, including timers stopped in the Kimai web UI.
@@ -193,7 +193,7 @@ wordmark is shown.
   markers such as `[BLANK_AUDIO]`. `voice.API` posts multipart form data to
   `{url}/audio/transcriptions` (`model`, `language`, `response_format=json`).
 - Models (quantised, multilingual) are downloaded from the whisper.cpp Hugging Face
-  repository to `~/.local/share/kimai-tracker/models`, written to a temp file and only
+  repository to `~/.local/share/solutions.klein-it.tracker-for-kimai/models`, written to a temp file and only
   accepted if complete and starting with the ggml magic bytes.
 - Push-to-talk uses the hotkey manager with press/release callbacks: X11 key release with
   auto-repeat filtering; on Wayland the portal's `Activated`/`Deactivated` signals.

@@ -9,12 +9,12 @@ import (
 
 // Records from the default input while playing a test file. Needs a running
 // sound server whose default source hears the default sink (e.g. a PulseAudio
-// null sink with its monitor as default source) and KIMAI_TRACKER_AUDIO_TEST
+// null sink with its monitor as default source) and TRACKER_FOR_KIMAI_AUDIO_TEST
 // pointing to a WAV file; skipped otherwise.
 func TestRecorderCapturesAudio(t *testing.T) {
-	file := os.Getenv("KIMAI_TRACKER_AUDIO_TEST")
+	file := os.Getenv("TRACKER_FOR_KIMAI_AUDIO_TEST")
 	if file == "" {
-		t.Skip("KIMAI_TRACKER_AUDIO_TEST not set")
+		t.Skip("TRACKER_FOR_KIMAI_AUDIO_TEST not set")
 	}
 	var levels []float64
 	r := &Recorder{OnLevel: func(l float64) { levels = append(levels, l) }}
@@ -43,7 +43,7 @@ func TestRecorderCapturesAudio(t *testing.T) {
 	if len(levels) < 10 {
 		t.Errorf("only %d level reports", len(levels))
 	}
-	if out := os.Getenv("KIMAI_TRACKER_AUDIO_OUT"); out != "" {
+	if out := os.Getenv("TRACKER_FOR_KIMAI_AUDIO_OUT"); out != "" {
 		os.WriteFile(out, EncodeWAV(samples, SampleRate), 0o644)
 	}
 	if _, err := r.Stop(); err != ErrNotRecording {

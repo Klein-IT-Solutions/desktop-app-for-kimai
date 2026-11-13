@@ -7,18 +7,18 @@ import (
 
 	"github.com/godbus/dbus/v5"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
 )
 
-// checkKeyring implements `kimai-tracker --check-keyring`: it reports which
+// checkKeyring implements `tracker-for-kimai --check-keyring`: it reports which
 // Secret Service provider is running and does a store/read/delete round trip
 // with a throw-away value. The real API token is not touched.
 func checkKeyring() int {
-	fmt.Println("Kimai Tracker – keyring check")
+	fmt.Println("Tracker for Kimai – keyring check")
 	fmt.Printf("  Desktop:      %s (%s)\n", orDash(os.Getenv("XDG_CURRENT_DESKTOP")), orDash(os.Getenv("XDG_SESSION_TYPE")))
 	fmt.Printf("  Provider:     %s\n", secretServiceProvider())
 
-	const key = "kimai-tracker-selftest"
+	const key = "tracker-for-kimai-selftest"
 	const value = "selftest-value"
 	var k config.Keyring
 	steps := []struct {

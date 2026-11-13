@@ -1,4 +1,4 @@
-module github.com/klein-it-solutions/kimai-desktop-app
+module github.com/klein-it-solutions/desktop-app-for-kimai
 
 go 1.25.0
 

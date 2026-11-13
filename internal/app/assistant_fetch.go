@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/fetch"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/fetch"
 )
 
 func downloadGGUF(ctx context.Context, url, dest string, progress func(int64, int64)) error {

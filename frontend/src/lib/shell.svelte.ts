@@ -2,7 +2,7 @@ import { Events } from "@wailsio/runtime";
 import {
   ShellService,
   type ShellStatus,
-} from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+} from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
 
 /** Background features (tray, autostart, notifications, hotkey). */
 export const shell = $state<{ status: ShellStatus | null }>({ status: null });

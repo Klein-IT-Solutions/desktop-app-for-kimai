@@ -6,7 +6,7 @@ import {
   type PendingStatus,
   type Selection,
   type TrackerState,
-} from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+} from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
 import { errorMessage } from "./connection.svelte";
 
 const empty: Selection = { id: 0, name: "" };

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { slide } from "svelte/transition";
-  import type { Option } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import type { Option } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import SelectionRows from "../components/SelectionRows.svelte";
   import AssistantNotices from "../components/AssistantNotices.svelte";
   import TimerButton from "../components/TimerButton.svelte";

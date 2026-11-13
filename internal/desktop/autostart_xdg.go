@@ -11,13 +11,13 @@ import (
 	"strings"
 )
 
-// AutostartFile returns ~/.config/autostart/kimai-tracker.desktop.
+// AutostartFile returns ~/.config/autostart/tracker-for-kimai.desktop.
 func AutostartFile() (string, error) {
 	dir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "autostart", "kimai-tracker.desktop"), nil
+	return filepath.Join(dir, "autostart", "tracker-for-kimai.desktop"), nil
 }
 
 // AutostartEnabled reports whether the autostart entry exists and is not disabled.
@@ -67,10 +67,10 @@ func SetAutostart(enabled bool) error {
 func autostartEntry(exe string) string {
 	return fmt.Sprintf(`[Desktop Entry]
 Type=Application
-Name=Kimai Tracker
+Name=Tracker for Kimai
 Comment=Minimalist desktop time tracker for Kimai
 Exec=%s --hidden
-Icon=kimai-tracker
+Icon=tracker-for-kimai
 Terminal=false
 Categories=Office;Utility;
 X-GNOME-Autostart-enabled=true

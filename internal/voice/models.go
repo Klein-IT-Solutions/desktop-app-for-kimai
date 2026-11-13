@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/fetch"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/fetch"
 )
 
 // ModelBaseURL hosts the official whisper.cpp ggml models.
@@ -41,10 +41,10 @@ func FindModel(id string) (Model, bool) {
 	return Model{}, false
 }
 
-// DataDir returns ~/.local/share/kimai-tracker (honouring XDG_DATA_HOME).
+// DataDir returns ~/.local/share/solutions.klein-it.tracker-for-kimai (honouring XDG_DATA_HOME).
 func DataDir() (string, error) {
 	if d := os.Getenv("XDG_DATA_HOME"); d != "" {
-		return filepath.Join(d, "kimai-tracker"), nil
+		return filepath.Join(d, "solutions.klein-it.tracker-for-kimai"), nil
 	}
 	switch runtime.GOOS {
 	case "darwin", "windows":
@@ -52,13 +52,13 @@ func DataDir() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		return filepath.Join(d, "kimai-tracker"), nil
+		return filepath.Join(d, "solutions.klein-it.tracker-for-kimai"), nil
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".local", "share", "kimai-tracker"), nil
+	return filepath.Join(home, ".local", "share", "solutions.klein-it.tracker-for-kimai"), nil
 }
 
 // ModelPath returns where a downloaded model is stored.

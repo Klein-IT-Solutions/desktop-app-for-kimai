@@ -8,13 +8,13 @@
         AllowPromptForPassword="false">
     </Settings>
     <Installer
-        Path="kimai-tracker"
+        Path="tracker-for-kimai"
         Arguments=""
-        InstallLocation="C:\Program Files\Klein IT Solutions\Kimai Tracker">
+        InstallLocation="C:\Program Files\Klein IT Solutions\Tracker for Kimai">
     </Installer>
     <PackageInformation
-        PackageName="Kimai Tracker"
-        PackageDisplayName="Kimai Tracker"
+        PackageName="Tracker for Kimai"
+        PackageDisplayName="Tracker for Kimai"
         PublisherName="CN=Klein IT Solutions"
         PublisherDisplayName="Klein IT Solutions"
         Version="0.1.0.0"
@@ -25,10 +25,10 @@
         </Capabilities>
         <Applications>
             <Application
-                Id="solutions.klein-it.kimai-tracker"
+                Id="solutions.klein-it.tracker-for-kimai"
                 Description="Minimalist desktop time tracker for Kimai"
-                DisplayName="Kimai Tracker"
-                ExecutableName="kimai-tracker"
+                DisplayName="Tracker for Kimai"
+                ExecutableName="tracker-for-kimai"
                 EntryPoint="Windows.FullTrustApplication">
                 
             </Application>
@@ -41,13 +41,13 @@
         </Dependencies>
         <Properties>
             <Framework>false</Framework>
-            <DisplayName>Kimai Tracker</DisplayName>
+            <DisplayName>Tracker for Kimai</DisplayName>
             <PublisherDisplayName>Klein IT Solutions</PublisherDisplayName>
             <Description>Minimalist desktop time tracker for Kimai</Description>
             <Logo>Assets\AppIcon.png</Logo>
         </Properties>
     </PackageInformation>
-    <SaveLocation PackagePath="kimai-tracker.msix" />
+    <SaveLocation PackagePath="tracker-for-kimai.msix" />
     <PackageIntegrity>
         <CertificatePath></CertificatePath>
     </PackageIntegrity>

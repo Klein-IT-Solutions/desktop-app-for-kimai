@@ -1,7 +1,7 @@
 import {
   AssistantService,
   type AssistantSettings,
-} from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+} from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
 import { errorMessage } from "./connection.svelte";
 import { descriptionTarget, type DescriptionTarget } from "./descriptionTarget";
 

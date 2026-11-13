@@ -36,7 +36,7 @@ func File(ctx context.Context, client *http.Client, url, dest string, magic []by
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "kimai-tracker")
+	req.Header.Set("User-Agent", "tracker-for-kimai")
 	resp, err := client.Do(req)
 	if err != nil {
 		if ctx.Err() != nil {

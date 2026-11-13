@@ -3,26 +3,26 @@
 #
 # The lines below are called `modelines`. See `:help modeline`
 
-name: "kimai-tracker"
+name: "tracker-for-kimai"
 arch: ${GOARCH}
 platform: "linux"
 version: "${VERSION}" # set by the build (make / release workflow)
 section: "utils"
 priority: "extra"
 maintainer: ${GIT_COMMITTER_NAME} <${GIT_COMMITTER_EMAIL}>
-description: "Minimalist desktop time tracker for Kimai"
+description: "Unofficial desktop time tracker for Kimai (not affiliated with Kimai)"
 vendor: "Klein IT Solutions"
-homepage: "https://github.com/klein-it-solutions/kimai-desktop-app"
+homepage: "https://github.com/klein-it-solutions/desktop-app-for-kimai"
 license: "MIT"
 release: "1"
 
 contents:
-  - src: "./bin/kimai-tracker"
-    dst: "/usr/local/bin/kimai-tracker"
+  - src: "./bin/tracker-for-kimai"
+    dst: "/usr/local/bin/tracker-for-kimai"
   - src: "./build/appicon.png"
-    dst: "/usr/share/icons/hicolor/128x128/apps/kimai-tracker.png"
-  - src: "./build/linux/kimai-tracker.desktop"
-    dst: "/usr/share/applications/kimai-tracker.desktop"
+    dst: "/usr/share/icons/hicolor/128x128/apps/tracker-for-kimai.png"
+  - src: "./build/linux/tracker-for-kimai.desktop"
+    dst: "/usr/share/applications/tracker-for-kimai.desktop"
 
 # Default dependencies for the GTK4 + WebKitGTK 6.0 stack (Ubuntu 24.04+ / Debian 13+)
 depends:

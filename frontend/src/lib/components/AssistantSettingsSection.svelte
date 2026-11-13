@@ -4,7 +4,7 @@
     AssistantService,
     type AssistantDownload,
     type AssistantSettings,
-  } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import Icon from "./Icon.svelte";
   import Toggle from "./Toggle.svelte";
   import { errorMessage } from "../connection.svelte";

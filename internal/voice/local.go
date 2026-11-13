@@ -44,7 +44,7 @@ func (l Local) Transcribe(ctx context.Context, wav []byte, language string) (str
 	if err := l.Check(); err != nil {
 		return "", err
 	}
-	f, err := os.CreateTemp("", "kimai-tracker-*.wav")
+	f, err := os.CreateTemp("", "tracker-for-kimai-*.wav")
 	if err != nil {
 		return "", err
 	}

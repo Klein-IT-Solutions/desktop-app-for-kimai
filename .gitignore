@@ -7,9 +7,9 @@ build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
 .idea
 
 # Generated from build/linux/desktop
-build/linux/kimai-tracker.desktop
-build/linux/appimage/kimai-tracker
-build/linux/appimage/kimai-tracker.png
+build/linux/tracker-for-kimai.desktop
+build/linux/appimage/tracker-for-kimai
+build/linux/appimage/tracker-for-kimai.png
 *.AppImage
 *.deb
 *.rpm

@@ -5,14 +5,14 @@
     type ConnectionResult,
     type Info,
     type Settings,
-  } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import Button from "../components/Button.svelte";
   import Icon from "../components/Icon.svelte";
   import StatusBanner from "../components/StatusBanner.svelte";
   import TextField from "../components/TextField.svelte";
   import Toggle from "../components/Toggle.svelte";
   import HotkeyRecorder from "../components/HotkeyRecorder.svelte";
-  import { ShellService } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import { ShellService } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import { shell } from "../shell.svelte";
   import BrandLogo from "../brand/BrandLogo.svelte";
   import VoiceSettingsSection from "../components/VoiceSettingsSection.svelte";
@@ -350,7 +350,7 @@
       <BrandLogo height={32} />
     </button>
     <p class="mt-2 text-[12px] text-fg-muted">
-      Kimai Tracker {info?.version ?? ""} ist ein Open-Source-Projekt von {BRAND.company}.
+      Tracker for Kimai {info?.version ?? ""} ist ein Open-Source-Projekt von {BRAND.company}.
     </p>
     <div class="mt-2 flex justify-center gap-4 text-[12px]">
       <button class="flex items-center gap-1 text-accent hover:opacity-75" onclick={() => AppService.OpenURL(BRAND.website)}>
@@ -370,6 +370,6 @@
     class="mt-4 w-full rounded-[10px] bg-field py-2 text-[13px] text-danger shadow-[inset_0_0_0_0.5px_var(--hairline)] transition-colors hover:bg-field-hover"
     onclick={() => ShellService.Quit()}
   >
-    Kimai Tracker beenden
+    Tracker for Kimai beenden
   </button>
 </div>

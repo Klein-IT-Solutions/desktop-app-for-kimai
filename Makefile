@@ -1,4 +1,4 @@
-# Kimai Tracker – developer entry points.
+# Tracker for Kimai – developer entry points.
 #
 #   make dev      Hot-reload development mode (Go + Vite)
 #   make build    Production binary in ./bin
@@ -7,7 +7,7 @@
 # Ubuntu 22.04 (no GTK4/WebKitGTK 6.0): append GTK3=1 to use the
 # GTK3 / WebKit2GTK 4.1 stack, e.g. `make build GTK3=1`.
 
-APP     := kimai-tracker
+APP     := tracker-for-kimai
 
 # Version from the latest v* tag (e.g. v0.2.0 → 0.2.0; between releases
 # 0.2.0-3-gabc123). The release workflow passes VERSION explicitly.

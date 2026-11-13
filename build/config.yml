@@ -6,11 +6,11 @@ version: '3'
 # This information is used to generate the build assets.
 info:
   companyName: "Klein IT Solutions" # The name of the company
-  productName: "Kimai Tracker" # The name of the application
-  productIdentifier: "solutions.klein-it.kimai-tracker" # The unique product identifier
-  description: "Desktop time tracking for Kimai" # The application description
-  copyright: "(c) 2026, Klein IT Solutions and the Kimai Tracker contributors" # Copyright text
-  comments: "Open-source Kimai time tracker" # Comments
+  productName: "Tracker for Kimai" # The name of the application
+  productIdentifier: "solutions.klein-it.tracker-for-kimai" # The unique product identifier
+  description: "Unofficial desktop time tracker for Kimai" # The application description
+  copyright: "(c) 2026, Klein IT Solutions and the Tracker for Kimai contributors" # Copyright text
+  comments: "Open-source, unofficial tracker for Kimai. Not affiliated with Kimai." # Comments
   version: "0.1.0" # The application version
   # cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
   #                               # Should match the name of your .icon file without the extension

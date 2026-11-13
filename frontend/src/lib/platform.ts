@@ -1,8 +1,8 @@
 import {
   AppService,
   type Info,
-} from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
-import type { WindowControls } from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/desktop";
+} from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
+import type { WindowControls } from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/desktop";
 
 export type { WindowControls };
 

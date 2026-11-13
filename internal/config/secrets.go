@@ -12,7 +12,7 @@ import (
 )
 
 // KeyringService is the service name under which secrets are stored.
-const KeyringService = "kimai-tracker"
+const KeyringService = "solutions.klein-it.tracker-for-kimai"
 
 // Secret identifiers.
 const (
@@ -110,7 +110,7 @@ type FileSecrets struct {
 	mu   sync.Mutex
 }
 
-// DefaultSecretsPath returns ~/.config/kimai-tracker/secrets.json.
+// DefaultSecretsPath returns ~/.config/solutions.klein-it.tracker-for-kimai/secrets.json.
 func DefaultSecretsPath() (string, error) {
 	p, err := DefaultPath()
 	if err != nil {

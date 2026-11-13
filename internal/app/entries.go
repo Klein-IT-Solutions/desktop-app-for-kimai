@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/kimai"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/kimai"
 )
 
 const (

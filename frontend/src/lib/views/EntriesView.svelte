@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, untrack } from "svelte";
   import { Events } from "@wailsio/runtime";
-  import { EntriesService, type DayEntries, type Entry } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import { EntriesService, type DayEntries, type Entry } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import Icon from "../components/Icon.svelte";
   import { errorMessage } from "../connection.svelte";
   import { addDays, dayLabel, formatHours } from "../format";

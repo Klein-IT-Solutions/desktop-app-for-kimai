@@ -14,7 +14,7 @@ func TestAutostart(t *testing.T) {
 		t.Skip("linux only")
 	}
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("APPIMAGE", "/home/anna/Apps/Kimai Tracker.AppImage")
+	t.Setenv("APPIMAGE", "/home/anna/Apps/Tracker for Kimai.AppImage")
 	if AutostartEnabled() {
 		t.Fatal("should be disabled initially")
 	}
@@ -26,7 +26,7 @@ func TestAutostart(t *testing.T) {
 	}
 	path, _ := AutostartFile()
 	data, _ := os.ReadFile(path)
-	if !strings.Contains(string(data), `Exec="/home/anna/Apps/Kimai Tracker.AppImage" --hidden`) {
+	if !strings.Contains(string(data), `Exec="/home/anna/Apps/Tracker for Kimai.AppImage" --hidden`) {
 		t.Errorf("entry = %s", data)
 	}
 	if err := SetAutostart(false); err != nil || AutostartEnabled() {
@@ -39,9 +39,9 @@ func TestAutostart(t *testing.T) {
 
 func TestDesktopExecQuote(t *testing.T) {
 	for in, want := range map[string]string{
-		"/usr/local/bin/kimai-tracker": "/usr/local/bin/kimai-tracker",
-		"/opt/My App/run":              `"/opt/My App/run"`,
-		`/tmp/a"b`:                     `"/tmp/a\"b"`,
+		"/usr/local/bin/tracker-for-kimai": "/usr/local/bin/tracker-for-kimai",
+		"/opt/My App/run":                  `"/opt/My App/run"`,
+		`/tmp/a"b`:                         `"/tmp/a\"b"`,
 	} {
 		if got := desktopExecQuote(in); got != want {
 			t.Errorf("quote(%q) = %q, want %q", in, got, want)

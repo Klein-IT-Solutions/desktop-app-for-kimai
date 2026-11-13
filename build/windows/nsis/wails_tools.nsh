@@ -5,19 +5,19 @@
 !include "FileFunc.nsh"
 
 !ifndef INFO_PROJECTNAME
-    !define INFO_PROJECTNAME "kimai-tracker"
+    !define INFO_PROJECTNAME "tracker-for-kimai"
 !endif
 !ifndef INFO_COMPANYNAME
     !define INFO_COMPANYNAME "Klein IT Solutions"
 !endif
 !ifndef INFO_PRODUCTNAME
-    !define INFO_PRODUCTNAME "Kimai Tracker"
+    !define INFO_PRODUCTNAME "Tracker for Kimai"
 !endif
 !ifndef INFO_PRODUCTVERSION
     !define INFO_PRODUCTVERSION "0.1.0"
 !endif
 !ifndef INFO_COPYRIGHT
-    !define INFO_COPYRIGHT "(c) 2026, Klein IT Solutions and the Kimai Tracker contributors"
+    !define INFO_COPYRIGHT "(c) 2026, Klein IT Solutions and the Tracker for Kimai contributors"
 !endif
 !ifndef PRODUCT_EXECUTABLE
     !define PRODUCT_EXECUTABLE "${INFO_PROJECTNAME}.exe"

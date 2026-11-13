@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/fetch"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/fetch"
 )
 
 // Official llama.cpp release sources. llama.cpp publishes its builds as
@@ -98,7 +98,7 @@ func ResolveFromAPI(ctx context.Context, client *http.Client, apiURL, goos, goar
 		return Asset{}, err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "kimai-tracker")
+	req.Header.Set("User-Agent", "tracker-for-kimai")
 	resp, err := client.Do(req)
 	if err != nil {
 		return Asset{}, err
@@ -133,7 +133,7 @@ func ResolveFromFeed(ctx context.Context, client *http.Client, feedURL, base, go
 	if err != nil {
 		return Asset{}, err
 	}
-	req.Header.Set("User-Agent", "kimai-tracker")
+	req.Header.Set("User-Agent", "tracker-for-kimai")
 	resp, err := client.Do(req)
 	if err != nil {
 		return Asset{}, err
@@ -171,7 +171,7 @@ func exists(ctx context.Context, client *http.Client, url string) bool {
 	if err != nil {
 		return false
 	}
-	req.Header.Set("User-Agent", "kimai-tracker")
+	req.Header.Set("User-Agent", "tracker-for-kimai")
 	resp, err := client.Do(req)
 	if err != nil {
 		return false

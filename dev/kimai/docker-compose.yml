@@ -1,6 +1,6 @@
 # Local Kimai test instance for development and integration tests.
 # Use `make kimai-up` / `make kimai-down` instead of calling this directly.
-name: kimai-tracker-dev
+name: tracker-for-kimai-dev
 
 services:
   db:

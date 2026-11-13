@@ -7,8 +7,8 @@ export const BRAND = {
   company: "Klein IT Solutions",
   website: "https://klein-it.solutions",
   websiteLabel: "klein-it.solutions",
-  repository: "https://github.com/klein-it-solutions/kimai-desktop-app",
-  license: "https://github.com/klein-it-solutions/kimai-desktop-app/blob/main/LICENSE",
+  repository: "https://github.com/klein-it-solutions/desktop-app-for-kimai",
+  license: "https://github.com/klein-it-solutions/desktop-app-for-kimai/blob/main/LICENSE",
 };
 
 // Vite resolves these at build time; missing files simply yield no entry.

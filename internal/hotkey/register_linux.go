@@ -7,7 +7,7 @@ import (
 )
 
 // fallbackHint tells users how to bind the shortcut themselves.
-const fallbackHint = "Lege in den Tastatur-Einstellungen deines Desktops ein eigenes Kürzel für den Befehl „kimai-tracker --toggle“ an."
+const fallbackHint = "Lege in den Tastatur-Einstellungen deines Desktops ein eigenes Kürzel für den Befehl „tracker-for-kimai --toggle“ an."
 
 func register(ctx context.Context, acc Accelerator, sc Shortcut, onPress, onRelease func(), onStatus func(Status)) Status {
 	wayland := strings.EqualFold(os.Getenv("XDG_SESSION_TYPE"), "wayland") || os.Getenv("WAYLAND_DISPLAY") != ""

@@ -2,7 +2,7 @@ import { Events } from "@wailsio/runtime";
 import {
   SettingsService,
   type ConnectionResult,
-} from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+} from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
 
 /** Reactive state of the stored Kimai connection, shared by all views. */
 export const connection = $state<{ result: ConnectionResult | null; checking: boolean }>({

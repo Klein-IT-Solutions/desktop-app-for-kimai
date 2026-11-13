@@ -1,6 +1,6 @@
 # Development
 
-Technical notes for building, testing and releasing Kimai Tracker. For design
+Technical notes for building, testing and releasing Tracker for Kimai. For design
 decisions see [architecture.md](architecture.md).
 
 Stack: Go, [Wails v3](https://v3.wails.io), Svelte 5, TypeScript, Tailwind CSS.
@@ -16,11 +16,11 @@ CMake and Git.
 ```bash
 sudo apt install build-essential pkg-config cmake git libgtk-4-dev libwebkitgtk-6.0-dev
 
-git clone https://github.com/klein-it-solutions/kimai-desktop-app.git
-cd kimai-desktop-app
+git clone https://github.com/klein-it-solutions/desktop-app-for-kimai.git
+cd desktop-app-for-kimai
 make deps      # wails3 CLI, frontend packages, whisper.cpp (static library)
-make build     # → ./bin/kimai-tracker
-./bin/kimai-tracker
+make build     # → ./bin/tracker-for-kimai
+./bin/tracker-for-kimai
 ```
 
 The Makefile finds `wails3` in `$(go env GOPATH)/bin` automatically.
@@ -43,8 +43,8 @@ pacman -S --needed make git mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake \
 export PATH="$PATH:/c/Program Files/Go/bin:/c/Program Files/nodejs:$(cygpath "$(go env GOPATH)")/bin"
 
 make deps
-make build     # → bin/kimai-tracker.exe
-make package   # → bin/kimai-tracker-amd64-installer.exe (NSIS, per-user install)
+make build     # → bin/tracker-for-kimai.exe
+make package   # → bin/tracker-for-kimai-amd64-installer.exe (NSIS, per-user install)
 ```
 
 The binary is linked statically (only Windows system DLLs) and needs the
@@ -103,10 +103,10 @@ Release assets:
 
 | File | Platform |
 | ---- | -------- |
-| `Kimai-Tracker-<version>-windows-x64-setup.exe` | Windows installer (per user, no admin rights) |
-| `Kimai-Tracker-<version>-windows-x64-portable.exe` | Windows, single executable |
-| `kimai-tracker_<version>_amd64.deb` | Ubuntu 24.04+ / Debian 13+ |
-| `Kimai-Tracker-<version>-x86_64.AppImage` | Other Linux distributions |
+| `Tracker-for-Kimai-<version>-windows-x64-setup.exe` | Windows installer (per user, no admin rights) |
+| `Tracker-for-Kimai-<version>-windows-x64-portable.exe` | Windows, single executable |
+| `tracker-for-kimai_<version>_amd64.deb` | Ubuntu 24.04+ / Debian 13+ |
+| `Tracker-for-Kimai-<version>-x86_64.AppImage` | Other Linux distributions |
 | `SHA256SUMS` | Checksums |
 
 The Windows executables are not code-signed yet, so SmartScreen warns on first
@@ -121,35 +121,35 @@ workflow (lint, tests and build on Linux and Windows).
 
 | | Linux | Windows |
 | - | ----- | ------- |
-| Settings | `~/.config/kimai-tracker/config.json` | `%APPDATA%\kimai-tracker\config.json` |
-| Last selection | `~/.config/kimai-tracker/state.json` | `%APPDATA%\kimai-tracker\state.json` |
-| Cached lists | `~/.cache/kimai-tracker/` | `%LOCALAPPDATA%\kimai-tracker\` |
-| Models, llama.cpp | `~/.local/share/kimai-tracker/` | `%APPDATA%\kimai-tracker\` |
+| Settings | `~/.config/solutions.klein-it.tracker-for-kimai/config.json` | `%APPDATA%\solutions.klein-it.tracker-for-kimai\config.json` |
+| Last selection | `~/.config/solutions.klein-it.tracker-for-kimai/state.json` | `%APPDATA%\solutions.klein-it.tracker-for-kimai\state.json` |
+| Cached lists | `~/.cache/solutions.klein-it.tracker-for-kimai/` | `%LOCALAPPDATA%\solutions.klein-it.tracker-for-kimai\` |
+| Models, llama.cpp | `~/.local/share/solutions.klein-it.tracker-for-kimai/` | `%APPDATA%\solutions.klein-it.tracker-for-kimai\` |
 | Token | Secret Service (GNOME Keyring, KWallet …) | Windows Credential Manager |
-| Start at login | `~/.config/autostart/kimai-tracker.desktop` | `HKCU\…\CurrentVersion\Run` |
+| Start at login | `~/.config/autostart/tracker-for-kimai.desktop` | `HKCU\…\CurrentVersion\Run` |
 
 If the keyring cannot be used, the app offers to store the token unencrypted in
 `secrets.json` next to the settings (mode 0600). Diagnose keyring problems with:
 
 ```bash
-kimai-tracker --check-keyring
+tracker-for-kimai --check-keyring
 ```
 
 ### Environment variables
 
 | Variable | Purpose |
 | -------- | ------- |
-| `KIMAI_TRACKER_MODEL_URL` | Mirror for whisper models (`ggml-*.bin`) |
-| `KIMAI_TRACKER_LLAMA_URL` | Mirror for llama.cpp release archives |
-| `KIMAI_TRACKER_LLM_MODEL_URL` | Mirror for GGUF language models |
-| `KIMAI_TRACKER_WINDOW_STYLE` | Force window buttons: `mac`, `windows`, `gnome`, `kde` |
+| `TRACKER_FOR_KIMAI_MODEL_URL` | Mirror for whisper models (`ggml-*.bin`) |
+| `TRACKER_FOR_KIMAI_LLAMA_URL` | Mirror for llama.cpp release archives |
+| `TRACKER_FOR_KIMAI_LLM_MODEL_URL` | Mirror for GGUF language models |
+| `TRACKER_FOR_KIMAI_WINDOW_STYLE` | Force window buttons: `mac`, `windows`, `gnome`, `kde` |
 
 ### Command-line options
 
 ```bash
-kimai-tracker --hidden   # start in the tray (used by autostart)
-kimai-tracker --toggle   # show/hide the running app's window
-kimai-tracker --timer    # start/stop the timer with the last selection
+tracker-for-kimai --hidden   # start in the tray (used by autostart)
+tracker-for-kimai --toggle   # show/hide the running app's window
+tracker-for-kimai --timer    # start/stop the timer with the last selection
 ```
 
 ## Global shortcuts per platform

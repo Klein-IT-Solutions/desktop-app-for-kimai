@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Window } from "@wailsio/runtime";
-  import { ShellService } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import { ShellService } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import type { WindowControls } from "../platform";
 
   let { controls }: { controls: WindowControls } = $props();

@@ -13,9 +13,9 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/desktop"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/hotkey"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/desktop"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/hotkey"
 )
 
 //go:embed assets/tray-idle.png
@@ -80,7 +80,7 @@ type Shell struct {
 func NewShell(store *config.Store, tracker *TrackerService, notifier *notifications.NotificationService) *Shell {
 	s := &Shell{store: store, tracker: tracker, notifier: notifier}
 	s.hotkeys = hotkey.NewManager(
-		hotkey.Shortcut{ID: "toggle-window", Description: "Kimai Tracker ein-/ausblenden"},
+		hotkey.Shortcut{ID: "toggle-window", Description: "Tracker for Kimai ein-/ausblenden"},
 		func() { application.InvokeAsync(s.ToggleWindow) },
 		nil,
 		func(hotkey.Status) { s.emitStatus() },
@@ -127,8 +127,8 @@ func (s *Shell) Shutdown() { s.hotkeys.Stop() }
 func (s *Shell) buildTray() {
 	s.tray = s.app.SystemTray.New()
 	s.tray.SetIcon(trayIdleIcon)
-	s.tray.SetLabel("Kimai Tracker")
-	s.tray.SetTooltip("Kimai Tracker")
+	s.tray.SetLabel("Tracker for Kimai")
+	s.tray.SetTooltip("Tracker for Kimai")
 	s.tray.OnClick(func() { s.ToggleWindow() })
 
 	m := s.app.NewMenu()
@@ -319,7 +319,7 @@ func (s *Shell) ToggleTimer() {
 		_, err = s.tracker.Start(StartRequest{Customer: st.Customer, Project: st.Project, Activity: st.Activity, Description: st.Description})
 	}
 	if err != nil {
-		s.notifyAlways("Kimai Tracker", err.Error())
+		s.notifyAlways("Tracker for Kimai", err.Error())
 	}
 }
 
@@ -367,7 +367,7 @@ func (s *Shell) notifyAlways(title, body string) {
 	}
 	go func() {
 		_ = s.notifier.SendNotification(notifications.NotificationOptions{
-			ID:    "kimai-tracker-timer",
+			ID:    "tracker-for-kimai-timer",
 			Title: title,
 			Body:  body,
 		})
@@ -383,8 +383,8 @@ func (s *Shell) Status() ShellStatus {
 		AutostartSupported: autostartSupported(),
 		Notifications:      cfg.Notifications,
 		Hotkey:             s.hotkeys.Status(),
-		ToggleCommand:      "kimai-tracker " + FlagToggle,
-		TimerCommand:       "kimai-tracker " + FlagTimer,
+		ToggleCommand:      "tracker-for-kimai " + FlagToggle,
+		TimerCommand:       "tracker-for-kimai " + FlagTimer,
 	}
 }
 
@@ -455,7 +455,7 @@ func (s *ShellService) SetHotkey(accelerator string) (ShellStatus, error) {
 
 // TestNotification sends a sample notification.
 func (s *ShellService) TestNotification() {
-	s.shell.notifyAlways("Kimai Tracker", "Benachrichtigungen funktionieren.")
+	s.shell.notifyAlways("Tracker for Kimai", "Benachrichtigungen funktionieren.")
 }
 
 // CloseWindow hides the window to the tray (or minimises it without tray).

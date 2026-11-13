@@ -1,6 +1,6 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
-  import type { ConnectionResult } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import type { ConnectionResult } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import Icon from "./Icon.svelte";
 
   let { result }: { result: ConnectionResult } = $props();

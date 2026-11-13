@@ -11,7 +11,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
 )
 
 // fakeTimesheets is a tiny in-memory Kimai for tracker tests.

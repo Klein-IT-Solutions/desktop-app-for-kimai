@@ -37,7 +37,7 @@ func listenPortal(ctx context.Context, acc Accelerator, sc Shortcut, onPress, on
 
 	// Newer portals identify unsandboxed apps by an explicitly registered app id.
 	_ = conn.Object(portalDest, portalPath).Call("org.freedesktop.host.portal.Registry.Register", 0,
-		"kimai-tracker", map[string]dbus.Variant{}).Err
+		"tracker-for-kimai", map[string]dbus.Variant{}).Err
 
 	signals := make(chan *dbus.Signal, 16)
 	conn.Signal(signals)
@@ -108,7 +108,7 @@ func listenPortal(ctx context.Context, acc Accelerator, sc Shortcut, onPress, on
 	return s, true
 }
 
-func token() string { return fmt.Sprintf("kimai_tracker_%d", rand.Int63()) }
+func token() string { return fmt.Sprintf("tracker_for_kimai_%d", rand.Int63()) }
 
 // requestPath predicts the Request object path so we can listen before calling.
 func requestPath(conn *dbus.Conn, tok string) dbus.ObjectPath {

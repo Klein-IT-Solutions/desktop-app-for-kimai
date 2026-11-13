@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade, fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
-  import type { Option, OptionList } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  import type { Option, OptionList } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import Icon from "./Icon.svelte";
   import { errorMessage } from "../connection.svelte";
 

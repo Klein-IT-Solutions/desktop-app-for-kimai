@@ -6,10 +6,10 @@
 		"0000": {
 			"ProductVersion": "0.1.0",
 			"CompanyName": "Klein IT Solutions",
-			"FileDescription": "Desktop time tracking for Kimai",
-			"LegalCopyright": "(c) 2026, Klein IT Solutions and the Kimai Tracker contributors",
-			"ProductName": "Kimai Tracker",
-			"Comments": "Open-source Kimai time tracker"
+			"FileDescription": "Unofficial desktop time tracker for Kimai",
+			"LegalCopyright": "(c) 2026, Klein IT Solutions and the Tracker for Kimai contributors",
+			"ProductName": "Tracker for Kimai",
+			"Comments": "Open-source, unofficial tracker for Kimai. Not affiliated with Kimai."
 		}
 	}
 }

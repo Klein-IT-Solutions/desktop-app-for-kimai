@@ -10,7 +10,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/kimai"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/kimai"
 )
 
 // EventTrackerChanged is emitted with a TrackerState whenever the timer state changes.

@@ -11,9 +11,9 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/hotkey"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/voice"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/hotkey"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/voice"
 )
 
 // Voice events.
@@ -105,7 +105,7 @@ func NewVoiceService(store *config.Store, conn *Connection, shell *Shell) *Voice
 		OnLimit: func() { go v.Stop() },
 	}
 	v.ptt = hotkey.NewManager(
-		hotkey.Shortcut{ID: "push-to-talk", Description: "Kimai Tracker – Spracheingabe (gedrückt halten)"},
+		hotkey.Shortcut{ID: "push-to-talk", Description: "Tracker for Kimai – Spracheingabe (gedrückt halten)"},
 		func() { _ = v.Start() },
 		func() { go v.Stop() },
 		func(hotkey.Status) {},
@@ -233,7 +233,7 @@ func (v *VoiceService) DownloadModel(id string) error {
 			cancel()
 		}()
 		base := voice.ModelBaseURL
-		if u := os.Getenv("KIMAI_TRACKER_MODEL_URL"); u != "" { // mirror, e.g. in company networks
+		if u := os.Getenv("TRACKER_FOR_KIMAI_MODEL_URL"); u != "" { // mirror, e.g. in company networks
 			base = strings.TrimRight(u, "/")
 		}
 		err := voice.Download(ctx, nil, base+"/"+m.File, dest, func(done, total int64) {

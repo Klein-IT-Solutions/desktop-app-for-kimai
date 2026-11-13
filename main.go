@@ -9,9 +9,10 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/app"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/desktop"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/app"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/desktop"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/voice"
 )
 
 //go:embed all:frontend/dist
@@ -85,6 +86,12 @@ func main() {
 		os.Exit(checkKeyring())
 	}
 
+	if dir, err := voice.DataDir(); err == nil {
+		config.MigrateLegacy(dir)
+	} else {
+		config.MigrateLegacy("")
+	}
+
 	var mainWindow *application.WebviewWindow
 
 	secretsPath, err := config.DefaultSecretsPath()
@@ -99,7 +106,7 @@ func main() {
 	shell := app.NewShell(store, tracker, notifier)
 
 	a := application.New(application.Options{
-		Name:        "Kimai Tracker",
+		Name:        "Tracker for Kimai",
 		Description: "Minimalist desktop time tracker for Kimai",
 		Services: []application.Service{
 			application.NewService(app.NewAppService()),
@@ -115,8 +122,8 @@ func main() {
 			Handler: application.AssetFileServerFS(assets),
 		},
 		Linux: application.LinuxOptions{
-			ApplicationID: "solutions.klein_it.KimaiTracker",
-			ProgramName:   "kimai-tracker",
+			ApplicationID: "solutions.klein_it.TrackerForKimai",
+			ProgramName:   "tracker-for-kimai",
 			// The app lives in the tray; closing the window must not quit it.
 			DisableQuitOnLastWindowClosed: true,
 		},
@@ -124,7 +131,7 @@ func main() {
 		// window or runs --toggle / --timer (used for desktop shortcuts, e.g.
 		// on Wayland where apps cannot grab global keys).
 		SingleInstance: &application.SingleInstanceOptions{
-			UniqueID:               "solutions.klein-it.kimai-tracker",
+			UniqueID:               "solutions.klein-it.tracker-for-kimai",
 			OnSecondInstanceLaunch: func(d application.SecondInstanceData) { shell.HandleArgs(d.Args) },
 		},
 		Mac: application.MacOptions{
@@ -135,7 +142,7 @@ func main() {
 
 	mainWindow = a.Window.NewWithOptions(application.WebviewWindowOptions{
 		Name:            "main",
-		Title:           "Kimai Tracker",
+		Title:           "Tracker for Kimai",
 		Width:           windowWidth,
 		Height:          windowHeight,
 		MinWidth:        windowWidth,

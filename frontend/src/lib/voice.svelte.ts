@@ -2,7 +2,7 @@ import { Events } from "@wailsio/runtime";
 import {
   VoiceService,
   type VoiceState,
-} from "../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+} from "../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
 import { descriptionTarget } from "./descriptionTarget";
 import { bulletsForDictation } from "./assistant.svelte";
 

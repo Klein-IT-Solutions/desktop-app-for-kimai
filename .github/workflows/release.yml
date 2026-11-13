@@ -76,7 +76,7 @@ jobs:
           elif [ "$GITHUB_EVENT_NAME" != "push" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag -a "$tag" -m "Kimai Tracker $tag"
+            git tag -a "$tag" -m "Tracker for Kimai $tag"
             git push origin "$tag"
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
@@ -123,8 +123,8 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir dist
-          cp bin/kimai-tracker.deb "dist/kimai-tracker_${VERSION}_amd64.deb"
-          cp bin/kimai-tracker-x86_64.AppImage "dist/Kimai-Tracker-${VERSION}-x86_64.AppImage"
+          cp bin/tracker-for-kimai.deb "dist/tracker-for-kimai_${VERSION}_amd64.deb"
+          cp bin/tracker-for-kimai-x86_64.AppImage "dist/Tracker-for-Kimai-${VERSION}-x86_64.AppImage"
           chmod +x dist/*.AppImage
           ls -la dist
 
@@ -183,8 +183,8 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir dist
-          cp bin/kimai-tracker-amd64-installer.exe "dist/Kimai-Tracker-${VERSION}-windows-x64-setup.exe"
-          cp bin/kimai-tracker.exe "dist/Kimai-Tracker-${VERSION}-windows-x64-portable.exe"
+          cp bin/tracker-for-kimai-amd64-installer.exe "dist/Tracker-for-Kimai-${VERSION}-windows-x64-setup.exe"
+          cp bin/tracker-for-kimai.exe "dist/Tracker-for-Kimai-${VERSION}-windows-x64-portable.exe"
           ls -la dist
 
       - uses: actions/upload-artifact@v4
@@ -219,9 +219,9 @@ jobs:
 
           | System | Datei |
           | --- | --- |
-          | **Windows 10/11** | \`Kimai-Tracker-${VERSION}-windows-x64-setup.exe\` (Installer) oder \`…-portable.exe\` (ohne Installation) |
-          | **Ubuntu 24.04+ / Debian 13+** | \`kimai-tracker_${VERSION}_amd64.deb\` – installieren mit \`sudo apt install ./kimai-tracker_${VERSION}_amd64.deb\` |
-          | **Andere Linux-Distributionen** | \`Kimai-Tracker-${VERSION}-x86_64.AppImage\` – ausführbar machen (\`chmod +x\`) und starten |
+          | **Windows 10/11** | \`Tracker-for-Kimai-${VERSION}-windows-x64-setup.exe\` (Installer) oder \`…-portable.exe\` (ohne Installation) |
+          | **Ubuntu 24.04+ / Debian 13+** | \`tracker-for-kimai_${VERSION}_amd64.deb\` – installieren mit \`sudo apt install ./tracker-for-kimai_${VERSION}_amd64.deb\` |
+          | **Andere Linux-Distributionen** | \`Tracker-for-Kimai-${VERSION}-x86_64.AppImage\` – ausführbar machen (\`chmod +x\`) und starten |
 
           Prüfsummen: \`SHA256SUMS\`.
           NOTES
@@ -234,7 +234,7 @@ jobs:
           case "$VERSION" in *-*) prerelease="--prerelease" ;; esac
           gh release create "$TAG" dist/* \
             --verify-tag \
-            --title "Kimai Tracker $TAG" \
+            --title "Tracker for Kimai $TAG" \
             --notes-file notes.md \
             --generate-notes \
             $prerelease

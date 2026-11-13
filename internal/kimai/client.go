@@ -59,7 +59,7 @@ func New(baseURL, token string, opts ...Option) (*Client, error) {
 		baseURL:   u,
 		token:     strings.TrimSpace(token),
 		http:      &http.Client{Timeout: DefaultTimeout},
-		userAgent: "kimai-tracker",
+		userAgent: "tracker-for-kimai",
 		Location:  time.Local,
 	}
 	for _, o := range opts {

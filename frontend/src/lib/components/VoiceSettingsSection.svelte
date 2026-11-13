@@ -6,7 +6,7 @@
     type DownloadProgress,
     type ModelStatus,
     type VoiceSettings,
-  } from "../../../bindings/github.com/klein-it-solutions/kimai-desktop-app/internal/app";
+  } from "../../../bindings/github.com/klein-it-solutions/desktop-app-for-kimai/internal/app";
   import Button from "./Button.svelte";
   import HotkeyRecorder from "./HotkeyRecorder.svelte";
   import Icon from "./Icon.svelte";

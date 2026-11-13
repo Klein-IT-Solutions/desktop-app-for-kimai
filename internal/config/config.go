@@ -1,5 +1,5 @@
 // Package config loads and stores the user configuration in
-// ~/.config/kimai-tracker/config.json. Secrets (API tokens, keys) are never
+// ~/.config/solutions.klein-it.tracker-for-kimai/config.json. Secrets (API tokens, keys) are never
 // written to this file; see secrets.go.
 package config
 
@@ -14,7 +14,7 @@ import (
 )
 
 // AppDirName is the directory name below the user config dir.
-const AppDirName = "kimai-tracker"
+const AppDirName = "solutions.klein-it.tracker-for-kimai"
 
 // Config holds all non-secret settings.
 type Config struct {
@@ -99,7 +99,7 @@ type Store struct {
 	cfg  Config
 }
 
-// DefaultPath returns ~/.config/kimai-tracker/config.json (honouring XDG_CONFIG_HOME).
+// DefaultPath returns ~/.config/solutions.klein-it.tracker-for-kimai/config.json (honouring XDG_CONFIG_HOME).
 func DefaultPath() (string, error) {
 	dir, err := os.UserConfigDir()
 	if err != nil {

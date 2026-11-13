@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/klein-it-solutions/kimai-desktop-app/internal/config"
+	"github.com/klein-it-solutions/desktop-app-for-kimai/internal/config"
 )
 
 func newVoiceFixture(t *testing.T) (*VoiceService, config.MemorySecrets) {
